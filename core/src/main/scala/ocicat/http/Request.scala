@@ -1,9 +1,17 @@
-package ocicat.server
+package ocicat.http
+
+import java.nio.charset.StandardCharsets
 
 import scala.util.control.NonFatal
 
 abstract class Request {
   protected def queryString: Map[String, String]
+
+  def contentType: ContentType
+
+  def rawBody: Array[Byte]
+
+  def bodyAsString: String = new String(rawBody, StandardCharsets.UTF_8)
 
   object query {
     def get[A](key: String)(implicit decoder: QueryStringDecoder[A]): Option[A] =
@@ -26,4 +34,5 @@ object QueryStringDecoder {
   }
 }
 
-final case class DefaultRequest(queryString: Map[String, String]) extends Request
+final case class DefaultRequest(queryString: Map[String, String], contentType: ContentType, rawBody: Array[Byte])
+    extends Request

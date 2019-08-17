@@ -1,8 +1,6 @@
-package ocicat.server
+package ocicat.http
 
 import java.nio.charset.StandardCharsets
-
-import ocicat.http.{ContentType, Status}
 
 final case class Response(status: Status, contentType: ContentType, content: Array[Byte])
 

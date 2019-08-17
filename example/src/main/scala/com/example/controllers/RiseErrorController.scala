@@ -1,6 +1,7 @@
 package com.example.controllers
 
-import ocicat.server.{Handler, Response}
+import ocicat.http.Response
+import ocicat.server.Handler
 
 class RiseErrorController {
 

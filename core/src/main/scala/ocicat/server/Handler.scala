@@ -1,5 +1,7 @@
 package ocicat.server
 
+import ocicat.http.{Request, Response}
+
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.language.higherKinds
 import scala.util.control.NonFatal
@@ -33,14 +35,6 @@ object Handler {
   def WIP: Handler[Response]  = interrupt(Response.NotImplemented("WIP"))
 
   def unit: Handler[Unit] = pure(())
-
-  def getOptionalQuery(key: String): Handler[Option[String]] = Handler(req => _(req.query.get[String](key)))
-
-  def getOptionalQuery(key: String, default: String): Handler[String] =
-    Handler(req => _(req.query.get[String](key).getOrElse(default)))
-
-  def getRequiredQuery(key: String)(ifEmpty: => Response): Handler[String] =
-    getOptionalQuery(key).flatMap(someValue(_)(ifEmpty))
 
   def catchNonFatal[A](a: => A)(ifError: Throwable => Response): Handler[A] = successValue(Try(a))(ifError)
 
@@ -81,4 +75,19 @@ object Handler {
       }
       p.future
     }
+
+  // request
+
+  def getRequest: Handler[Request] = Handler(req => _(req))
+
+  def getBodyAsString: Handler[String] = getRequest.map(_.bodyAsString)
+
+  def getOptionalQuery(key: String): Handler[Option[String]] = Handler(req => _(req.query.get[String](key)))
+
+  def getOptionalQuery(key: String, default: String): Handler[String] =
+    Handler(req => _(req.query.get[String](key).getOrElse(default)))
+
+  def getRequiredQuery(key: String)(ifEmpty: => Response): Handler[String] =
+    getOptionalQuery(key).flatMap(someValue(_)(ifEmpty))
+
 }

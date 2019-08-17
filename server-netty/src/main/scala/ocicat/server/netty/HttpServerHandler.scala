@@ -1,13 +1,14 @@
 package ocicat.server.netty
 
+import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.handler.codec.http._
-import ocicat.http.Method
-import ocicat.server.{DefaultRequest, Handler, Response, Router}
+import ocicat.http.{ContentType, DefaultRequest, Method, Request, Response}
+import ocicat.server.{Handler, Router}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.chaining._
@@ -34,13 +35,31 @@ private[netty] class HttpServerHandler(router: Router, executor: ExecutionContex
   override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject): Unit = {
     msg match {
       case req: HttpRequest =>
+        val uri = new URI(req.uri)
+        val request: Request = {
+          val query = Option(uri.getQuery)
+            .map(_.split('&').toList)
+            .map(_.map(_.split('=').toList))
+            .map(_.collect { case k :: v :: Nil => (k, v) }.toMap)
+            .getOrElse(Map.empty)
+          val body = req match {
+            case fullReq: FullHttpRequest =>
+              val buf = new Array[Byte](fullReq.content.readableBytes)
+              fullReq.content.duplicate.readBytes(buf)
+              buf
+            case other =>
+              Array.emptyByteArray
+          }
+          val contentType = ContentType.fromString(req.headers.get(CONTENT_TYPE)).get
+          DefaultRequest(query, contentType, body)
+        }
         val resF: Future[HttpResponse] = (for {
           method   <- Handler.someValue(Method.fromString(req.method.name))(Response.BadRequest("invalid method"))
-          path     = Paths.get(req.uri)
+          path     <- Handler.catchNonFatal(uri.getPath)(_ => Response.BadRequest("invalid uri path"))
           route    <- Handler.someValue(router.findRoute(method, path))(Response.NotFound(s"not found: $path"))
           response <- route.handler
         } yield response)
-          .run(DefaultRequest(Map.empty))
+          .run(request)
           .map(createNettyResponse(_)(req))(executor)
           .recover {
             case e: Throwable =>

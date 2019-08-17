@@ -1,3 +1,7 @@
 package ocicat.server
 
-trait Controller {}
+import ocicat.http.Response
+
+trait Controller {
+  type RunnableHandler = Handler[Response]
+}
