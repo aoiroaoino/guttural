@@ -6,55 +6,55 @@ import java.nio.file.Paths
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.handler.codec.http._
-import ocicat.http.{Method, Status}
-import ocicat.server.{Handler, Response, Router}
+import ocicat.http.Method
+import ocicat.server.{DefaultRequest, Handler, Response, Router}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.chaining._
 
 private[netty] class HttpServerHandler(router: Router, executor: ExecutionContext)
     extends SimpleChannelInboundHandler[HttpObject] {
   import HttpHeaderNames._, HttpHeaderValues._
 
   def createNettyResponse(response: Response)(nettyRequest: HttpRequest): HttpResponse = {
+    val status = Converter.toHttpResponseStatus(response.status)
     val content =
       if (response.content.isEmpty) Unpooled.EMPTY_BUFFER
-      else Unpooled.wrappedBuffer(response.content.getBytes(StandardCharsets.UTF_8))
-    val status = Converter.toHttpResponseStatus(response.status)
+      else Unpooled.wrappedBuffer(response.content)
 
-    val res: FullHttpResponse =
-      new DefaultFullHttpResponse(nettyRequest.protocolVersion(), status, content)
-    res
-      .headers()
-      .set(CONTENT_TYPE, TEXT_PLAIN)
-      .setInt(CONTENT_LENGTH, res.content.readableBytes)
-    res
+    new DefaultFullHttpResponse(nettyRequest.protocolVersion(), status, content)
+      .tap { res =>
+        res
+          .headers()
+          .set(CONTENT_TYPE, TEXT_PLAIN)
+          .setInt(CONTENT_LENGTH, res.content.readableBytes)
+      }
   }
 
   override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject): Unit = {
     msg match {
       case req: HttpRequest =>
         val resF: Future[HttpResponse] = (for {
-          method   <- Handler.someValue(Method.fromString(req.method.name))(Response(Status.BadRequest, "invalid method"))
+          method   <- Handler.someValue(Method.fromString(req.method.name))(Response.BadRequest("invalid method"))
           path     = Paths.get(req.uri)
-          route    <- Handler.someValue(router.findRoute(method, path))(Response(Status.NotFound, s"not found: $path"))
+          route    <- Handler.someValue(router.findRoute(method, path))(Response.NotFound(s"not found: $path"))
           response <- route.handler
-          _        = println(s"method: $method, path: $path, route: $route, response: $response")
-        } yield response).run
+        } yield response)
+          .run(DefaultRequest(Map.empty))
           .map(createNettyResponse(_)(req))(executor)
           .recover {
             case e: Throwable =>
               e.printStackTrace()
-              val res =
-                new DefaultFullHttpResponse(
-                  req.protocolVersion(),
-                  HttpResponseStatus.INTERNAL_SERVER_ERROR,
-                  Unpooled.wrappedBuffer("Unexpected error occurred".getBytes(StandardCharsets.UTF_8))
-                )
-              res
-                .headers()
-                .set(CONTENT_TYPE, TEXT_PLAIN)
-                .setInt(CONTENT_LENGTH, res.content.readableBytes)
-              res
+              new DefaultFullHttpResponse(
+                req.protocolVersion(),
+                HttpResponseStatus.INTERNAL_SERVER_ERROR,
+                Unpooled.wrappedBuffer("Unexpected error occurred".getBytes(StandardCharsets.UTF_8))
+              ).tap { res =>
+                res
+                  .headers()
+                  .set(CONTENT_TYPE, TEXT_PLAIN)
+                  .setInt(CONTENT_LENGTH, res.content.readableBytes)
+              }
           }(executor)
 
         resF.foreach { res =>

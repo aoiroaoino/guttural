@@ -2,7 +2,7 @@ package com.example
 
 import java.util.concurrent.Executors
 
-import com.example.controllers.{HealthCheckController, RiseErrorController}
+import com.example.controllers.{HealthCheckController, RiseErrorController, UserController}
 import ocicat.server.{Server, ServerImpl}
 
 import scala.concurrent.ExecutionContext
@@ -11,8 +11,9 @@ class ExampleModule {
 
   private val healthCheckController = new HealthCheckController
   private val riseErrorController   = new RiseErrorController
+  private val userController        = new UserController
 
-  private val router = new ExampleRouter(healthCheckController, riseErrorController)
+  private val router = new ExampleRouter(healthCheckController, riseErrorController, userController)
 
   private val serverPort = 8080
 
