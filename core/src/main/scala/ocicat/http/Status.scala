@@ -1,26 +1,26 @@
 package ocicat.http
 
-sealed abstract case class Status(code: Int, reasonPhrase: String)
+sealed abstract class Status(val code: Int, val reasonPhrase: String) extends Product with Serializable
 
 object Status {
   // Successful 2xx
   // https://httpwg.org/specs/rfc7231.html#status.2xx
-  val Ok: Status      = new Status(200, "OK")      {}
-  val Created: Status = new Status(201, "Created") {}
+  case object Ok      extends Status(200, "OK")
+  case object Created extends Status(201, "Created")
 
   // Redirection 3xx
   // https://httpwg.org/specs/rfc7231.html#status.3xx
-  val SeeOther: Status    = new Status(303, "See Other")    {}
-  val NotModified: Status = new Status(304, "Not Modified") {}
+  case object SeeOther    extends Status(303, "See Other")
+  case object NotModified extends Status(304, "Not Modified")
 
   // 4xx
-  val BadRequest: Status   = new Status(400, "Bad Request")  {}
-  val Unauthorized: Status = new Status(401, "Unauthorized") {}
-  val NotFound: Status     = new Status(404, "Not Found")    {}
+  case object BadRequest   extends Status(400, "Bad Request")
+  case object Unauthorized extends Status(401, "Unauthorized")
+  case object NotFound     extends Status(404, "Not Found")
 
   // 5xx
-  val InternalServerError: Status = new Status(500, "Internal Server Error") {}
-  val NotImplemented: Status      = new Status(501, "Not Implemented")       {}
+  case object InternalServerError extends Status(500, "Internal Server Error")
+  case object NotImplemented      extends Status(501, "Not Implemented")
 
   private val all = Seq(
     // 2xx

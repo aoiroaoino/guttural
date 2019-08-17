@@ -3,7 +3,7 @@ package com.example
 import java.util.concurrent.Executors
 
 import com.example.controllers.{HealthCheckController, RiseErrorController}
-import ocicat.server.{NettyServer, Server}
+import ocicat.server.{Server, ServerImpl}
 
 import scala.concurrent.ExecutionContext
 
@@ -21,5 +21,5 @@ class ExampleModule {
     ExecutionContext.fromExecutor(es)
   }
 
-  val server: Server = new NettyServer(serverPort, router.impl, requestExecutor)
+  val server: Server = new ServerImpl(serverPort, router.impl, requestExecutor)
 }

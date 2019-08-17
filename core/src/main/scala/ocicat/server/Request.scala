@@ -1,3 +1,3 @@
 package ocicat.server
 
-final case class Request()
+abstract class Request {}

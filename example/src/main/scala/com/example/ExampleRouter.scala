@@ -9,7 +9,7 @@ class ExampleRouter(
     riseErrorController: RiseErrorController
 ) {
   val impl = Router(
-    Route(Method.Get, "/health_check", healthCheckController.isOk),
-    Route(Method.Get, "/rise_error", riseErrorController.run)
+    Route(Method.GET, "/health_check", healthCheckController.isOk),
+    Route(Method.GET, "/rise_error", riseErrorController.run)
   )
 }

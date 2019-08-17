@@ -1,68 +1,25 @@
-package ocicat.server
+package ocicat.server.netty
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 
-import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.Unpooled
-import io.netty.channel.{
-  Channel,
-  ChannelFuture,
-  ChannelFutureListener,
-  ChannelHandlerContext,
-  ChannelInitializer,
-  ChannelOption,
-  ChannelPipeline,
-  SimpleChannelInboundHandler
-}
-import io.netty.channel.nio.NioEventLoopGroup
-import io.netty.channel.socket.SocketChannel
-import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.netty.handler.codec.http.{
-  DefaultFullHttpResponse,
-  FullHttpResponse,
-  HttpHeaderNames,
-  HttpHeaderValues,
-  HttpObject,
-  HttpRequest,
-  HttpResponse,
-  HttpResponseStatus,
-  HttpServerCodec,
-  HttpServerExpectContinueHandler,
-  HttpUtil
-}
-import io.netty.handler.logging.{LogLevel, LoggingHandler}
-import javax.net.ssl.SSLContext
+import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
+import io.netty.handler.codec.http._
 import ocicat.http.{Method, Status}
+import ocicat.server.{Handler, Response, Router}
 
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
-class HttpHelloWorldServerInitializer(sslCtx: Option[SSLContext], router: Router, requestExecutor: ExecutionContext)
-    extends ChannelInitializer[SocketChannel] {
-  override def initChannel(ch: SocketChannel): Unit = {
-    val p: ChannelPipeline = ch.pipeline()
-    p.addLast(new HttpServerCodec)
-    p.addLast(new HttpServerExpectContinueHandler)
-    p.addLast(new HttpHelloWorldServerHandler(router, requestExecutor))
-  }
-}
-
-class HttpHelloWorldServerHandler(router: Router, executor: ExecutionContext)
+private[netty] class HttpServerHandler(router: Router, executor: ExecutionContext)
     extends SimpleChannelInboundHandler[HttpObject] {
   import HttpHeaderNames._, HttpHeaderValues._
 
   def createNettyResponse(response: Response)(nettyRequest: HttpRequest): HttpResponse = {
-    println("call createNettyResponse")
     val content =
       if (response.content.isEmpty) Unpooled.EMPTY_BUFFER
       else Unpooled.wrappedBuffer(response.content.getBytes(StandardCharsets.UTF_8))
-    val status = response.status match { // TODO: fully implement
-      case Status.Ok                  => HttpResponseStatus.OK
-      case Status.BadRequest          => HttpResponseStatus.BAD_REQUEST
-      case Status.NotFound            => HttpResponseStatus.NOT_FOUND
-      case Status.InternalServerError => HttpResponseStatus.INTERNAL_SERVER_ERROR
-      case _                          => HttpResponseStatus.NOT_IMPLEMENTED
-    }
+    val status = Converter.toHttpResponseStatus(response.status)
 
     val res: FullHttpResponse =
       new DefaultFullHttpResponse(nettyRequest.protocolVersion(), status, content)
@@ -125,33 +82,4 @@ class HttpHelloWorldServerHandler(router: Router, executor: ExecutionContext)
   override def channelReadComplete(ctx: ChannelHandlerContext): Unit = {
     ctx.flush()
   }
-}
-
-class NettyServer(
-    val port: Int,
-    val router: Router,
-    val requestExecutor: ExecutionContext
-) extends Server {
-
-  override def start(): Unit = {
-    val bossGroup   = new NioEventLoopGroup()
-    val workerGroup = new NioEventLoopGroup()
-    try {
-      val b = new ServerBootstrap()
-      b.option(ChannelOption.SO_BACKLOG, new java.lang.Integer(1024))
-      b.group(bossGroup, workerGroup)
-        .channel(classOf[NioServerSocketChannel])
-        .handler(new LoggingHandler(LogLevel.INFO))
-        .childHandler(new HttpHelloWorldServerInitializer(None, router, requestExecutor))
-
-      val ch: Channel = b.bind(port).sync().channel()
-
-      ch.closeFuture().sync()
-    } finally {
-      workerGroup.shutdownGracefully()
-      bossGroup.shutdownGracefully()
-    }
-  }
-
-  override def stop(): Unit = println("stop")
 }
