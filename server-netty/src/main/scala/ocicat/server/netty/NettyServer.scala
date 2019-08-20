@@ -5,11 +5,8 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.channel.{Channel, ChannelOption}
 import io.netty.handler.logging.{LogLevel, LoggingHandler}
-import ocicat.server.Router
 
-import scala.concurrent.ExecutionContext
-
-class NettyServer(val port: Int, val router: Router, requestExecutor: ExecutionContext) {
+class NettyServer(val port: Int, initializer: HttpServerInitializer) {
 
   def start(): Unit = {
     val bossGroup   = new NioEventLoopGroup()
@@ -20,7 +17,7 @@ class NettyServer(val port: Int, val router: Router, requestExecutor: ExecutionC
       b.group(bossGroup, workerGroup)
         .channel(classOf[NioServerSocketChannel])
         .handler(new LoggingHandler(LogLevel.INFO))
-        .childHandler(new HttpServerInitializer(None, router, requestExecutor))
+        .childHandler(initializer)
 
       val ch: Channel = b.bind(port).sync().channel()
 

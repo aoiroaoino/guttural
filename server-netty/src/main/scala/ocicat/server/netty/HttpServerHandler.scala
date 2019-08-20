@@ -2,7 +2,6 @@ package ocicat.server.netty
 
 import java.net.URI
 import java.nio.charset.StandardCharsets
-import java.nio.file.Paths
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
@@ -13,8 +12,12 @@ import ocicat.server.{Handler, Router}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.chaining._
 
-private[netty] class HttpServerHandler(router: Router, executor: ExecutionContext)
-    extends SimpleChannelInboundHandler[HttpObject] {
+// io.netty.channel.ChannelPipelineException: ocicat.server.netty.HttpServerHandler is not a @Sharable handler, so can't be added or removed multiple times.
+class HttpServerHandlerProvider(router: Router, executor: ExecutionContext) {
+  def get: HttpServerHandler = new HttpServerHandler(router, executor)
+}
+
+class HttpServerHandler(router: Router, executor: ExecutionContext) extends SimpleChannelInboundHandler[HttpObject] {
   import HttpHeaderNames._, HttpHeaderValues._
 
   def createNettyResponse(response: Response)(nettyRequest: HttpRequest): HttpResponse = {
@@ -50,13 +53,13 @@ private[netty] class HttpServerHandler(router: Router, executor: ExecutionContex
             case other =>
               Array.emptyByteArray
           }
-          val contentType = ContentType.fromString(req.headers.get(CONTENT_TYPE)).get
-          DefaultRequest(query, contentType, body)
+          val method      = Method.fromString(req.method.name).get
+          val contentType = if (method == Method.GET) None else ContentType.fromString(req.headers.get(CONTENT_TYPE))
+          DefaultRequest(query, contentType, body, uri, method)
         }
         val resF: Future[HttpResponse] = (for {
-          method   <- Handler.someValue(Method.fromString(req.method.name))(Response.BadRequest("invalid method"))
           path     <- Handler.catchNonFatal(uri.getPath)(_ => Response.BadRequest("invalid uri path"))
-          route    <- Handler.someValue(router.findRoute(method, path))(Response.NotFound(s"not found: $path"))
+          route    <- Handler.someValue(router.findRoute(request.method, path))(Response.NotFound(s"not found: $path"))
           response <- route.handler
         } yield response)
           .run(request)

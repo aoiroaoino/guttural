@@ -1,5 +1,6 @@
 package ocicat.http
 
+import java.net.URI
 import java.nio.charset.StandardCharsets
 
 import scala.util.control.NonFatal
@@ -7,7 +8,11 @@ import scala.util.control.NonFatal
 abstract class Request {
   protected def queryString: Map[String, String]
 
-  def contentType: ContentType
+  def method: Method
+
+  def uri: URI
+
+  def contentType: Option[ContentType]
 
   def rawBody: Array[Byte]
 
@@ -34,5 +39,10 @@ object QueryStringDecoder {
   }
 }
 
-final case class DefaultRequest(queryString: Map[String, String], contentType: ContentType, rawBody: Array[Byte])
-    extends Request
+final case class DefaultRequest(
+    queryString: Map[String, String],
+    contentType: Option[ContentType],
+    rawBody: Array[Byte],
+    uri: URI,
+    method: Method
+) extends Request

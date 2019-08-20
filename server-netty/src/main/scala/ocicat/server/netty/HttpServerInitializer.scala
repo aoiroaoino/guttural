@@ -8,16 +8,8 @@ import io.netty.handler.codec.http.{
   HttpServerCodec,
   HttpServerExpectContinueHandler
 }
-import javax.net.ssl.SSLContext
-import ocicat.server.Router
 
-import scala.concurrent.ExecutionContext
-
-private[netty] class HttpServerInitializer(
-    sslCtx: Option[SSLContext],
-    router: Router,
-    requestExecutor: ExecutionContext
-) extends ChannelInitializer[SocketChannel] {
+class HttpServerInitializer(provider: HttpServerHandlerProvider) extends ChannelInitializer[SocketChannel] {
 
   override def initChannel(ch: SocketChannel): Unit = {
     val p: ChannelPipeline = ch.pipeline()
@@ -25,6 +17,6 @@ private[netty] class HttpServerInitializer(
     p.addLast(new HttpContentDecompressor)
     p.addLast(new HttpObjectAggregator(256 * 1024 * 1024))
     p.addLast(new HttpServerExpectContinueHandler)
-    p.addLast(new HttpServerHandler(router, requestExecutor))
+    p.addLast(provider.get)
   }
 }
