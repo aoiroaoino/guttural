@@ -1,6 +1,6 @@
-package ocicat.server
+package monoton.server
 
-import ocicat.server.netty.{HttpServerHandler, HttpServerHandlerProvider, HttpServerInitializer, NettyServer}
+import monoton.server.netty.{HttpServerHandler, HttpServerHandlerProvider, HttpServerInitializer, NettyServer}
 
 import scala.concurrent.ExecutionContext
 

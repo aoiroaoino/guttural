@@ -3,7 +3,7 @@ package com.example
 import java.util.concurrent.Executors
 
 import com.example.controllers.{HealthCheckController, RiseErrorController, UserController}
-import ocicat.server.{Server, ServerImpl}
+import monoton.server.{Server, ServerImpl}
 
 import scala.concurrent.ExecutionContext
 

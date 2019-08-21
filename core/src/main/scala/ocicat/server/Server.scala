@@ -1,4 +1,4 @@
-package ocicat.server
+package monoton.server
 
 trait Server {
 

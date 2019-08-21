@@ -1,4 +1,4 @@
-package ocicat.server.netty
+package monoton.server.netty
 
 import java.net.URI
 import java.nio.charset.StandardCharsets
@@ -6,13 +6,13 @@ import java.nio.charset.StandardCharsets
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.handler.codec.http._
-import ocicat.http.{ContentType, DefaultRequest, Method, Request, Response}
-import ocicat.server.{Handler, Router}
+import monoton.http.{ContentType, DefaultRequest, Method, Request, Response}
+import monoton.server.{Handler, Router}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.chaining._
 
-// io.netty.channel.ChannelPipelineException: ocicat.server.netty.HttpServerHandler is not a @Sharable handler, so can't be added or removed multiple times.
+// io.netty.channel.ChannelPipelineException: monoton.server.netty.HttpServerHandler is not a @Sharable handler, so can't be added or removed multiple times.
 class HttpServerHandlerProvider(router: Router, executor: ExecutionContext) {
   def get: HttpServerHandler = new HttpServerHandler(router, executor)
 }

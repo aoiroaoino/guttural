@@ -1,6 +1,6 @@
-package ocicat.server
+package monoton.server
 
-import ocicat.http.Method
+import monoton.http.Method
 
 sealed abstract class Router {
   private[server] def routes: Seq[Route]

@@ -1,4 +1,4 @@
-package ocicat.http
+package monoton.http
 
 // https://httpwg.org/specs/rfc7231.html#methods
 

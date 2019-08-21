@@ -1,4 +1,4 @@
-package ocicat.http
+package monoton.http
 
 sealed abstract class ContentType extends Product with Serializable
 

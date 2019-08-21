@@ -1,6 +1,6 @@
-package ocicat.server
+package monoton.server
 
-import ocicat.http.{Request, Response}
+import monoton.http.{Request, Response}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.language.higherKinds

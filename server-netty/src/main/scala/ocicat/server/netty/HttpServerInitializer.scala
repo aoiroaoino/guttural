@@ -1,4 +1,4 @@
-package ocicat.server.netty
+package monoton.server.netty
 
 import io.netty.channel.{ChannelInitializer, ChannelPipeline}
 import io.netty.channel.socket.SocketChannel

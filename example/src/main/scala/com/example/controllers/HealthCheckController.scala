@@ -1,7 +1,7 @@
 package com.example.controllers
 
-import ocicat.http.Response
-import ocicat.server.{Controller, Handler}
+import monoton.http.Response
+import monoton.server.{Controller, Handler}
 
 class HealthCheckController extends Controller {
 

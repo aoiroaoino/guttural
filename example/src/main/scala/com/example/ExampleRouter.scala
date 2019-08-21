@@ -1,8 +1,8 @@
 package com.example
 
 import com.example.controllers.{HealthCheckController, RiseErrorController, UserController}
-import ocicat.http.Method
-import ocicat.server.{Route, Router}
+import monoton.http.Method
+import monoton.server.{Route, Router}
 
 class ExampleRouter(
     healthCheckController: HealthCheckController,

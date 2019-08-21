@@ -1,7 +1,7 @@
 package com.example.controllers
 
-import ocicat.http.Response
-import ocicat.server.Handler
+import monoton.http.Response
+import monoton.server.Handler
 
 class RiseErrorController {
 

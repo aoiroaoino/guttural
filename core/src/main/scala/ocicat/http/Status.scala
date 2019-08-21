@@ -1,4 +1,4 @@
-package ocicat.http
+package monoton.http
 
 sealed abstract class Status(val code: Int, val reasonPhrase: String) extends Product with Serializable
 

@@ -1,6 +1,6 @@
-package ocicat.server
+package monoton.server
 
-import ocicat.http.Response
+import monoton.http.Response
 
 trait Controller {
   type RunnableHandler = Handler[Response]

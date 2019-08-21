@@ -1,4 +1,4 @@
-package ocicat.server.netty
+package monoton.server.netty
 
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.nio.NioEventLoopGroup

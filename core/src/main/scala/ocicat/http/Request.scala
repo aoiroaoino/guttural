@@ -1,4 +1,4 @@
-package ocicat.http
+package monoton.http
 
 import java.net.URI
 import java.nio.charset.StandardCharsets

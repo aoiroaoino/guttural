@@ -1,7 +1,7 @@
-package ocicat.server.netty
+package monoton.server.netty
 
 import io.netty.handler.codec.http.HttpResponseStatus
-import ocicat.http.Status
+import monoton.http.Status
 
 object Converter {
 

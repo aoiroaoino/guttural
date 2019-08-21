@@ -1,6 +1,6 @@
 inThisBuild(Seq(
   organization := "dev.aoiroaoino",
-  name := "ocicat",
+  name := "monoton",
   version := "0.1.0-SNAPSHOT",
   scalafmtOnCompile := true
 ))
@@ -24,11 +24,11 @@ lazy val root = (project in file("."))
   .dependsOn(core, serverNetty)
 
 lazy val core = project
-  .settings(moduleName := "ocicat-core")
+  .settings(moduleName := "monoton-core")
   .settings(commonSettings)
 
 lazy val serverNetty = (project in file("server-netty"))
-  .settings(moduleName := "ocicat-server-netty")
+  .settings(moduleName := "monoton-server-netty")
   .settings(commonSettings)
   .settings(libraryDependencies ++= Seq(
     "io.netty" % "netty-all" % "4.1.38.Final",
@@ -38,6 +38,6 @@ lazy val serverNetty = (project in file("server-netty"))
 
 // TODO: move to other repository
 lazy val example = project
-  .settings(moduleName := "ocicat-example")
+  .settings(moduleName := "monoton-example")
   .settings(commonSettings)
   .dependsOn(core, serverNetty)
