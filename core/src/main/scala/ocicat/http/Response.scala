@@ -13,10 +13,11 @@ object Response {
 
     def empty[A](): Response = Response(status, ContentType.`application/octet-stream`, Array.empty)
   }
-  object Ok             extends ResponseBuilder(Status.Ok)
-  object NotFound       extends ResponseBuilder(Status.NotFound)
-  object BadRequest     extends ResponseBuilder(Status.BadRequest)
-  object NotImplemented extends ResponseBuilder(Status.NotImplemented)
+  object Ok                  extends ResponseBuilder(Status.Ok)
+  object NotFound            extends ResponseBuilder(Status.NotFound)
+  object BadRequest          extends ResponseBuilder(Status.BadRequest)
+  object NotImplemented      extends ResponseBuilder(Status.NotImplemented)
+  object InternalServerError extends ResponseBuilder(Status.InternalServerError)
 }
 
 trait ContentEncoder[A] {

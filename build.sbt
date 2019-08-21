@@ -1,8 +1,7 @@
 inThisBuild(Seq(
   organization := "dev.aoiroaoino",
   name := "monoton",
-  version := "0.1.0-SNAPSHOT",
-  scalafmtOnCompile := true
+  version := "0.1.0-SNAPSHOT"
 ))
 
 lazy val v = new {
