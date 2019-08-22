@@ -38,6 +38,9 @@ object Handler {
 
   def catchNonFatal[A](a: => A)(ifError: Throwable => Response): Handler[A] = successValue(Try(a))(ifError)
 
+  def fromFunction(func: Request => Response): Handler[Response] =
+    Handler(req => _(func(req)))
+
   def someValue[A](fa: Option[A])(ifNone: => Response): Handler[A] =
     ignoreRequest(fa.fold(Future.successful(ifNone)))
 

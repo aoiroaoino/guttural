@@ -24,7 +24,7 @@ class HttpServerHandler(
             (for {
               path     <- Handler.catchNonFatal(req.uri.getPath)(_ => Response.BadRequest("invalid uri path"))
               route    <- Handler.someValue(router.findRoute(req.method, path))(Response.NotFound(s"not found: $path"))
-              response <- route.handler
+              response <- route.handler()
             } yield response)
               .run(req)
               .recover {

@@ -1,6 +1,6 @@
 package com.example.controllers
 
-import monoton.http.Response
+import monoton.http.{Request, Response}
 import monoton.server.{Controller, Handler}
 
 class HealthCheckController extends Controller {
@@ -11,8 +11,9 @@ class HealthCheckController extends Controller {
       msg  <- Handler.pure(s"It's OK, $name")
     } yield Response.Ok(msg)
 
-  def echo: RunnableHandler =
-    for {
-      msg <- Handler.getBodyAsString
-    } yield Response.Ok(msg)
+  def ping = Response.Ok("pong")
+
+  def echo: Request => Response = { req =>
+    Response.Ok(req.bodyAsString)
+  }
 }
