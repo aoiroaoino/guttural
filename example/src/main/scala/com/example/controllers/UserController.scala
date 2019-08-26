@@ -15,5 +15,5 @@ class UserController extends Controller {
         println("read user from database")
         throw new Exception("no connection")
       }
-    } yield Response.Ok(name)
+    } yield Ok(name)
 }

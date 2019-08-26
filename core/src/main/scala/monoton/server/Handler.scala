@@ -1,6 +1,6 @@
 package monoton.server
 
-import monoton.http.{Request, Response}
+import monoton.http.{Request, Response, ResponseBuilders}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.language.higherKinds
@@ -31,8 +31,8 @@ object Handler {
 
   def interrupt(e: Response): Handler[Response] = Handler(_ => _ => Future.successful(e))
 
-  def TODO: Handler[Response] = interrupt(Response.NotImplemented("TODO"))
-  def WIP: Handler[Response]  = interrupt(Response.NotImplemented("WIP"))
+  def TODO: Handler[Response] = interrupt(ResponseBuilders.NotImplemented("TODO"))
+  def WIP: Handler[Response]  = interrupt(ResponseBuilders.NotImplemented("WIP"))
 
   def unit: Handler[Unit] = pure(())
 

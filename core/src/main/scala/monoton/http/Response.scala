@@ -2,23 +2,9 @@ package monoton.http
 
 import java.nio.charset.StandardCharsets
 
-final case class Response(status: Status, contentType: ContentType, content: Array[Byte])
+final case class Response(status: Status, contentType: ContentType, content: Array[Byte]) extends HttpMessage
 
-object Response {
-
-  sealed abstract class ResponseBuilder(status: Status) {
-
-    def apply[A](a: A)(implicit encoder: ContentEncoder[A]): Response =
-      Response(status, encoder.contentType, encoder.encode(a))
-
-    def empty[A](): Response = Response(status, ContentType.`application/octet-stream`, Array.empty)
-  }
-  object Ok                  extends ResponseBuilder(Status.Ok)
-  object NotFound            extends ResponseBuilder(Status.NotFound)
-  object BadRequest          extends ResponseBuilder(Status.BadRequest)
-  object NotImplemented      extends ResponseBuilder(Status.NotImplemented)
-  object InternalServerError extends ResponseBuilder(Status.InternalServerError)
-}
+object Response {}
 
 trait ContentEncoder[A] {
   def contentType: ContentType

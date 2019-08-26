@@ -9,11 +9,11 @@ class HealthCheckController extends Controller {
     for {
       name <- Handler.getOptionalQuery("name", "NO NAME")
       msg  <- Handler.pure(s"It's OK, $name")
-    } yield Response.Ok(msg)
+    } yield Ok(msg)
 
-  def ping = Response.Ok("pong")
+  def ping = Ok("pong")
 
   def echo: Request => Response = { req =>
-    Response.Ok(req.bodyAsString)
+    Ok(req.bodyAsString)
   }
 }

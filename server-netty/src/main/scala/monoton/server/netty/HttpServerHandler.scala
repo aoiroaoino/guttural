@@ -2,7 +2,7 @@ package monoton.server.netty
 
 import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.handler.codec.http._
-import monoton.http.Response
+import monoton.http.{Response, ResponseBuilders}
 import monoton.server.{Handler, Router}
 
 import scala.concurrent.ExecutionContext
@@ -22,15 +22,17 @@ class HttpServerHandler(
         httpDriver
           .run(httpReq) { req =>
             (for {
-              path     <- Handler.catchNonFatal(req.uri.getPath)(_ => Response.BadRequest("invalid uri path"))
-              route    <- Handler.someValue(router.findRoute(req.method, path))(Response.NotFound(s"not found: $path"))
+              path <- Handler.catchNonFatal(req.uri.getPath)(_ => ResponseBuilders.BadRequest("invalid uri path"))
+              route <- Handler.someValue(router.findRoute(req.method, path))(
+                ResponseBuilders.NotFound(s"not found: $path")
+              )
               response <- route.handler()
             } yield response)
               .run(req)
               .recover {
                 case e: Throwable =>
                   e.printStackTrace()
-                  Response.InternalServerError("Unexpected error occurred")
+                  ResponseBuilders.InternalServerError("Unexpected error occurred")
               }
           }
           .foreach { httpRes =>

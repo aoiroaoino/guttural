@@ -1,8 +1,8 @@
 package monoton.server
 
-import monoton.http.Response
+import monoton.http.{Response, ResponseBuilders}
 
-trait Controller {
+trait Controller extends ResponseBuilders {
   type RunnableHandler = Handler[Response]
 
   object request {}
