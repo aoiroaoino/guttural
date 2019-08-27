@@ -1,10 +1,10 @@
 package monoton.http
 
-// https://httpwg.org/specs/rfc7231.html#methods
-
-sealed abstract class Method(val upperCase: String) extends Product with Serializable
+abstract class Method(val token: String) extends Product with Serializable
 
 object Method {
+
+  // https://httpwg.org/specs/rfc7231.html#methods
   case object GET     extends Method("GET")
   case object HEAD    extends Method("HEAD")
   case object POST    extends Method("POST")
@@ -15,7 +15,11 @@ object Method {
   case object TRACE   extends Method("TRACE")
 
   private val all = Seq(GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE)
+  def fromString(s: String): Option[Method] =
+    all.find(_.token == s.toUpperCase) // case-insensitive
 
-  // case-insensitive
-  def fromString(s: String): Option[Method] = all.find(_.upperCase == s.toUpperCase)
+  // current supported methods
+  private val supportedMethods = Seq(GET, HEAD, POST)
+  def isSupportedMethod(method: Method): Boolean =
+    supportedMethods.contains(method)
 }

@@ -2,7 +2,7 @@ package com.example
 
 import java.util.concurrent.Executors
 
-import com.example.controllers.{HealthCheckController, RiseErrorController, UserController}
+import com.example.controllers.{HealthCheckController, UserController}
 import monoton.server.{Server, ServerImpl}
 
 import scala.concurrent.ExecutionContext
@@ -10,10 +10,9 @@ import scala.concurrent.ExecutionContext
 class ExampleModule {
 
   private val healthCheckController = new HealthCheckController
-  private val riseErrorController   = new RiseErrorController
   private val userController        = new UserController
 
-  private val router = new ExampleRouter(healthCheckController, riseErrorController, userController)
+  private val router = new ExampleRouter(healthCheckController, userController)
 
   private val serverPort = 8080
 

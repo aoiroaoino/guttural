@@ -14,6 +14,9 @@ private[monoton] trait ResponseBuilders {
   final val NotImplemented = new ResponseBuilderWithBody {
     override val status = Status.NotImplemented
   }
+  final val Unauthorized = new ResponseBuilderWithBody {
+    override val status = Status.Unauthorized
+  }
   final val InternalServerError = new ResponseBuilderWithBody {
     override val status = Status.InternalServerError
   }

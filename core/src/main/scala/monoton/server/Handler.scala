@@ -82,15 +82,4 @@ object Handler {
   // request
 
   def getRequest: Handler[Request] = Handler(req => _(req))
-
-  def getBodyAsString: Handler[String] = getRequest.map(_.bodyAsString)
-
-  def getOptionalQuery(key: String): Handler[Option[String]] = Handler(req => _(req.query.get[String](key)))
-
-  def getOptionalQuery(key: String, default: String): Handler[String] =
-    Handler(req => _(req.query.get[String](key).getOrElse(default)))
-
-  def getRequiredQuery(key: String)(ifEmpty: => Response): Handler[String] =
-    getOptionalQuery(key).flatMap(someValue(_)(ifEmpty))
-
 }

@@ -1,5 +1,7 @@
 package monoton.server.netty
 
+import java.net.URI
+
 import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.handler.codec.http._
 import monoton.http.{Response, ResponseBuilders}
@@ -22,7 +24,9 @@ class HttpServerHandler(
         httpDriver
           .run(httpReq) { req =>
             (for {
-              path <- Handler.catchNonFatal(req.uri.getPath)(_ => ResponseBuilders.BadRequest("invalid uri path"))
+              path <- Handler.catchNonFatal(new URI(httpReq.uri).getPath)(
+                _ => ResponseBuilders.BadRequest("invalid uri path")
+              )
               route <- Handler.someValue(router.findRoute(req.method, path))(
                 ResponseBuilders.NotFound(s"not found: $path")
               )

@@ -1,26 +1,44 @@
 package monoton.http
 
 import java.net.URI
-import java.nio.charset.StandardCharsets
+import java.nio.charset.{Charset, StandardCharsets}
+
+import monoton.server.BodyParser
 
 import scala.util.control.NonFatal
 
 abstract class Request {
-  protected def queryString: Map[String, String]
+  import Request._
 
+  // start-line ( request-line )
   def method: Method
+  def requestTarget: RequestTarget
+//  def httpVersion: String
 
-  def uri: URI
+  // * ( header-field CRLF )
+//  def headers: Seq[HeaderField]
+  def headers: Map[String, String]
 
-  def contentType: Option[ContentType]
+  // message-body
+  def body: RequestBody
+}
 
-  def rawBody: Array[Byte]
+object Request {
 
-  def bodyAsString: String = new String(rawBody, StandardCharsets.UTF_8)
+  sealed abstract class RequestTarget extends Product with Serializable
 
-  object query {
-    def get[A](key: String)(implicit decoder: QueryStringDecoder[A]): Option[A] =
-      queryString.get(key).flatMap(decoder.decode)
+  object RequestTarget {
+
+    final case class OriginForm(absolutePath: String, query: Option[String]) extends RequestTarget
+    object OriginForm {
+      def apply(uri: URI): OriginForm = OriginForm(uri.getPath, Option(uri.getQuery))
+    }
+
+    final case class AbsoluteForm(absoluteURI: URI) extends RequestTarget
+
+    final case class AuthorityForm(authority: String) extends RequestTarget
+
+    case object AsteriskForm extends RequestTarget
   }
 }
 
@@ -38,11 +56,3 @@ object QueryStringDecoder {
       catch { case NonFatal(_) => None }
   }
 }
-
-final case class DefaultRequest(
-    queryString: Map[String, String],
-    contentType: Option[ContentType],
-    rawBody: Array[Byte],
-    uri: URI,
-    method: Method
-) extends Request

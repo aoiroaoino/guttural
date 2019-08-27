@@ -2,7 +2,7 @@ package monoton.http
 
 import java.nio.charset.StandardCharsets
 
-final case class Response(status: Status, contentType: ContentType, content: Array[Byte]) extends HttpMessage
+final case class Response(status: Status, contentType: ContentType, content: Array[Byte])
 
 object Response {}
 
