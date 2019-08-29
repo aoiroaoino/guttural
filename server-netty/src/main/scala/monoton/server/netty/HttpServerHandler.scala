@@ -4,25 +4,29 @@ import java.net.URI
 
 import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.handler.codec.http._
-import monoton.http.{Response, ResponseBuilders}
+import monoton.http.{Request, Response, ResponseBuilders}
+import monoton.server.netty.filters.NotImplementedMethodFilter
 import monoton.server.{Handler, Router}
 
 import scala.concurrent.ExecutionContext
 
 class HttpServerHandler(
     router: Router,
-    httpDriver: HttpDriver,
+    httpFlow: HttpFlow,
     executor: ExecutionContext
 ) extends SimpleChannelInboundHandler[HttpObject] {
   import HttpHeaderNames._, HttpHeaderValues._
 
   private implicit val ec: ExecutionContext = executor
 
+  // TODO: URI の検証と Route の検索を Filter にし、Handler の実行と HttpResponse のみを行うように
+  val httpRequestFlow = NotImplementedMethodFilter |> httpFlow
+
   override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject): Unit = {
     msg match {
       case httpReq: HttpRequest =>
-        httpDriver
-          .run(httpReq) { req =>
+        httpRequestFlow
+          .runF(httpReq) { req =>
             (for {
               path <- Handler.catchNonFatal(new URI(httpReq.uri).getPath)(
                 _ => ResponseBuilders.BadRequest("invalid uri path")

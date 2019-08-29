@@ -1,9 +1,6 @@
 package monoton.http
 
 import java.net.URI
-import java.nio.charset.{Charset, StandardCharsets}
-
-import monoton.server.BodyParser
 
 import scala.util.control.NonFatal
 

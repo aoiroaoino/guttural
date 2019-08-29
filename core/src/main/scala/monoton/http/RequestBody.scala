@@ -2,6 +2,8 @@ package monoton.http
 
 import java.nio.charset.{Charset, StandardCharsets}
 
+import monoton.http.FormMapping.MappingError
+
 abstract class RequestBody extends Serializable {
 
   def asBytes: Array[Byte]
@@ -11,8 +13,7 @@ abstract class RequestBody extends Serializable {
 
   def asJson: RequestBody.AsJson
 
-  def asXml: RequestBody.AsXml
-
+  def asMultipartFormData: RequestBody.AsForm
 }
 
 object RequestBody {
@@ -21,33 +22,50 @@ object RequestBody {
 
   // text/plain
 
-  abstract class TextPlain extends RequestBody
+  abstract class TextPlain extends RequestBody {
+    override def asMultipartFormData: AsForm = AsForm.NotConvertible
+  }
 
-  final case class DefaultTextPlain(bytes: Array[Byte]) extends TextPlain {
+  final case class DefaultTextPlain(bytes: Array[Byte], charset: Option[Charset]) extends TextPlain {
     override def asBytes: Array[Byte]             = bytes
     override def asText(charset: Charset): String = new String(bytes, charset)
-
-    override def asJson: AsJson = AsJson.Just(bytes)
-    override def asXml: AsXml   = AsXml.Just(bytes)
+    override def asJson: AsJson                   = AsJson.Just(bytes)
   }
+
+  // application/x-www-form-urlencoded
+
+//  abstract class ApplicationXWWWFormUrlencoded extends RequestBody {
+//    override def asBytes: Array[Byte]             = Array.emptyByteArray
+//    override def asText(charset: Charset): String = ""
+//    override def asJson: AsJson                   = AsJson.NotConvertible
+//  }
+//
+//  final case class DefaultApplicationXWWWFormUrlencoded(m: Map[String, String]) extends ApplicationXWWWFormUrlencoded {
+//    override def asMultipartFormData: AsForm = AsForm.Just(m)
+//  }
 
   // application/json
 
-  abstract class ApplicationJson extends RequestBody
+  abstract class ApplicationJson extends RequestBody {
+    override def asMultipartFormData: AsForm = AsForm.NotConvertible
+  }
 
   final case class DefaultApplicationJson(bytes: Array[Byte]) extends ApplicationJson {
     override def asBytes: Array[Byte]             = bytes
     override def asText(charset: Charset): String = new String(bytes, charset)
-
-    override def asJson: AsJson = AsJson.Just(bytes)
-    override def asXml: AsXml   = AsXml.NotConvertible
+    override def asJson: AsJson                   = AsJson.Just(bytes)
   }
 
   // multipart/form-data
 
   abstract class MultipartFormData extends RequestBody {
-    override def asJson: AsJson = AsJson.NotConvertible
-    override def asXml: AsXml   = AsXml.NotConvertible
+    override def asJson: AsJson                   = AsJson.NotConvertible
+    override def asBytes: Array[Byte]             = Array.emptyByteArray
+    override def asText(charset: Charset): String = ""
+  }
+  final case class DefaultMultipartFormData(atters: Map[String, String] /* , files: Seq[Path] */ )
+      extends MultipartFormData {
+    override def asMultipartFormData: AsForm = AsForm.Just(atters)
   }
 
   // JSON Converter
@@ -68,22 +86,23 @@ object RequestBody {
     def from(bytes: Array[Byte]): Option[A]
   }
 
-  // XML Converter
+  // Form Converter
 
-  trait AsXml {
-    def to[A](factory: XmlFactory[A]): Option[A]
-  }
-  object AsXml {
-    final case class Just(bytes: Array[Byte]) extends AsXml {
-      override def to[A](factory: XmlFactory[A]): Option[A] = factory.from(bytes)
-    }
-    case object NotConvertible extends AsXml {
-      override def to[A](factory: XmlFactory[A]): Option[A] = None
-    }
+  final case class Attributes(underlying: Map[String, String]) {
+    def to[A](implicit M: FormMapping[A]): Either[List[MappingError], A] = M.getValue(underlying)
   }
 
-  trait XmlFactory[A] {
-    def from(bytes: Array[Byte]): Option[A]
+  trait AsForm {
+    def attributes: Attributes
+    // def files
+  }
+  object AsForm {
+    final case class Just(m: Map[String, String]) extends AsForm {
+      override def attributes: Attributes = Attributes(m)
+    }
+    case object NotConvertible extends AsForm {
+      override def attributes: Attributes = Attributes(Map.empty)
+    }
   }
 
   // empty
@@ -92,6 +111,6 @@ object RequestBody {
     override def asBytes: Array[Byte]             = Array.emptyByteArray
     override def asText(charset: Charset): String = ""
     override def asJson: AsJson                   = AsJson.NotConvertible
-    override def asXml: AsXml                     = AsXml.NotConvertible
+    override def asMultipartFormData: AsForm      = AsForm.NotConvertible
   }
 }

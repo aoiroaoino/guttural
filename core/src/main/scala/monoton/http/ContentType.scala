@@ -1,26 +1,20 @@
 package monoton.http
 
-sealed abstract class ContentType extends Product with Serializable
+sealed abstract case class ContentType(value: String)
 
 object ContentType {
-  object Text {
-    case object Plain extends ContentType
-  }
-  object Application {
-    case object Json               extends ContentType
-    case object OctetStream        extends ContentType
-    case object XWWWFORMUrlencoded extends ContentType
-  }
 
-  val `text/plain`: ContentType                        = Text.Plain
-  val `application/json`: ContentType                  = Application.Json
-  val `application/octet-stream`: ContentType          = Application.OctetStream
-  val `application/x-www-form-urlencoded`: ContentType = Application.XWWWFORMUrlencoded
+  val `text/plain`: ContentType                        = new ContentType("text/plain")                        {}
+  val `application/json`: ContentType                  = new ContentType("application/json")                  {}
+  val `application/octet-stream`: ContentType          = new ContentType("application/octet-stream")          {}
+  val `application/x-www-form-urlencoded`: ContentType = new ContentType("application/x-www-form-urlencoded") {}
+  val `multipart/form-data`: ContentType               = new ContentType("multipart/form-data")               {}
 
   def fromString(s: String): Option[ContentType] = PartialFunction.condOpt(s.toLowerCase) {
-    case "text/plain"                        => Text.Plain
-    case "application/json"                  => Application.Json
-    case "application/x-www-form-urlencoded" => Application.XWWWFORMUrlencoded
-    case _                                   => Text.Plain
+    case "text/plain"                        => `text/plain`
+    case "application/json"                  => `application/json`
+    case "application/x-www-form-urlencoded" => `application/x-www-form-urlencoded`
+    case "multipart/form-data"               => `multipart/form-data`
+    case _                                   => `application/octet-stream`
   }
 }

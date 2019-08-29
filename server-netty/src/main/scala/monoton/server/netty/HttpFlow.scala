@@ -6,10 +6,12 @@ import scala.util.chaining._
 import scala.jdk.CollectionConverters._
 import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http._
+import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType
+import io.netty.handler.codec.http.multipart.{Attribute, HttpPostMultipartRequestDecoder}
 import monoton.http.{ContentType, Method, Request, RequestBody, Response}
-import monoton.server.Driver
+import monoton.util.Flow
 
-class HttpDriver extends Driver[HttpRequest, HttpResponse, Request, Response] {
+class HttpFlow extends Flow[HttpRequest, HttpResponse, Request, Response] {
   import HttpHeaderNames._, HttpHeaderValues._
 
   override def to(httpReq: HttpRequest): Either[HttpResponse, Request] = {
@@ -31,14 +33,15 @@ class HttpDriver extends Driver[HttpRequest, HttpResponse, Request, Response] {
     for {
       reqMethod <- Method
         .fromString(httpReq.method.name)
-        .filter(Method.isSupportedMethod)
-        .toRight(NettyInternalServerError(httpReq.protocolVersion, "Unsupported Method"))
+        .filter(Method.isSupported)
+        .toRight(InternalServerError(httpReq.protocolVersion, "Unsupported Method"))
       contentType <- {
         if (reqMethod == Method.GET) Right(None)
         else
           Option(httpReq.headers.get(CONTENT_TYPE))
+            .map(_.split(';')(0).trim) // TODO
             .flatMap(ContentType.fromString)
-            .toRight(NettyBadRequest(httpReq.protocolVersion, "Missing Content-Type"))
+            .toRight(BadRequest(httpReq.protocolVersion, "Missing Content-Type"))
             .map(Some(_))
       }
     } yield {
@@ -52,7 +55,19 @@ class HttpDriver extends Driver[HttpRequest, HttpResponse, Request, Response] {
             case Some(ContentType.`application/json`) =>
               RequestBody.DefaultApplicationJson(rawBody)
             case Some(ContentType.`text/plain`) =>
-              RequestBody.DefaultTextPlain(rawBody)
+              RequestBody.DefaultTextPlain(rawBody, None)
+            case Some(ContentType.`multipart/form-data`) =>
+              val decoder = new HttpPostMultipartRequestDecoder(httpReq)
+              val data = Iterator
+                .continually(decoder)
+                .takeWhile(_.hasNext())
+                .map { a =>
+                  val d = a.next()
+                  (d.getName, d.getHttpDataType, d)
+                }
+                .collect { case (name, HttpDataType.Attribute, d) => (name, d.asInstanceOf[Attribute].getValue) }
+                .toMap
+              RequestBody.DefaultMultipartFormData(data).tap(_ => decoder.destroy())
             case _ =>
               RequestBody.Empty
           }
@@ -68,11 +83,11 @@ class HttpDriver extends Driver[HttpRequest, HttpResponse, Request, Response] {
       else Unpooled.wrappedBuffer(res.content)
 
     new DefaultFullHttpResponse(httpReq.protocolVersion(), status, content)
-      .tap { res =>
-        res
+      .tap { httpRes =>
+        httpRes
           .headers()
-          .set(CONTENT_TYPE, TEXT_PLAIN)
-          .setInt(CONTENT_LENGTH, res.content.readableBytes)
+          .set(CONTENT_TYPE, res.contentType.value)
+          .setInt(CONTENT_LENGTH, httpRes.content.readableBytes)
       }
   }
 }

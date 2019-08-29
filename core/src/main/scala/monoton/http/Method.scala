@@ -20,6 +20,6 @@ object Method {
 
   // current supported methods
   private val supportedMethods = Seq(GET, HEAD, POST)
-  def isSupportedMethod(method: Method): Boolean =
+  def isSupported(method: Method): Boolean =
     supportedMethods.contains(method)
 }

@@ -1,7 +1,8 @@
 package monoton.server
 
+import monoton.http.FormMapping.MappingError
 import monoton.http.RequestBody.JsonFactory
-import monoton.http.{Request, Response, ResponseBuilders}
+import monoton.http.{FormMapping, Request, Response, ResponseBuilders}
 
 trait Controller extends ResponseBuilders {
 
@@ -21,11 +22,14 @@ trait Controller extends ResponseBuilders {
 
     object body {
 
-      def as[A](factory: JsonFactory[A]): Handler[A] =
+      def bindToForm[A](mapping: FormMapping[A])(handleErrors: List[MappingError] => Response): Handler[A] =
         for {
-          req <- Handler.getRequest
-          a   <- Handler.someValue(req.body.asJson.to(factory))(BadRequest(""))
-        } yield a
+          req  <- Handler.getRequest
+          body <- Handler.rightValue(req.body.asMultipartFormData.attributes.to(mapping))(handleErrors)
+        } yield body
+
+      def as[A](factory: JsonFactory[A]): Handler[A] =
+        Handler.getRequest.flatMap(req => Handler.someValue(req.body.asJson.to(factory))(BadRequest("")))
     }
   }
 }
