@@ -7,5 +7,5 @@ abstract class ResponseBuilder {
 abstract class ResponseBuilderWithBody extends ResponseBuilder {
 
   final def apply[A](a: A)(implicit encoder: ContentEncoder[A]): Response =
-    Response(status, encoder.contentType, encoder.encode(a))
+    Response(status, encoder.defaultContentType, encoder.encode(a))
 }

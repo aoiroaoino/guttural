@@ -2,6 +2,8 @@ package monoton.http
 
 import java.net.URI
 
+import monoton.http.Request.RequestTarget
+
 import scala.util.control.NonFatal
 
 abstract class Request {
@@ -26,10 +28,7 @@ object Request {
 
   object RequestTarget {
 
-    final case class OriginForm(absolutePath: String, query: Option[String]) extends RequestTarget
-    object OriginForm {
-      def apply(uri: URI): OriginForm = OriginForm(uri.getPath, Option(uri.getQuery))
-    }
+    final case class OriginForm(absolutePath: String, query: Map[String, Seq[String]]) extends RequestTarget
 
     final case class AbsoluteForm(absoluteURI: URI) extends RequestTarget
 
@@ -37,7 +36,30 @@ object Request {
 
     case object AsteriskForm extends RequestTarget
   }
+
+  // factory
+  def apply(
+      method: Method,
+      uri: URI,
+      query: Map[String, Seq[String]],
+      headers: Map[String, String],
+      body: RequestBody
+  ): Request =
+    DefaultRequest(
+      method,
+      RequestTarget.OriginForm(uri.getPath, query), // TODO: support other target types
+      headers,
+      body
+    )
+
 }
+
+final case class DefaultRequest(
+    method: Method,
+    requestTarget: RequestTarget,
+    headers: Map[String, String],
+    body: RequestBody
+) extends Request
 
 trait QueryStringDecoder[A] {
   def decode(s: String): Option[A]

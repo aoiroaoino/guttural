@@ -64,4 +64,5 @@ lazy val adapterCirce = (project in file("adapter-circe"))
 lazy val example = project
   .settings(moduleName := "monoton-example")
   .settings(commonSettings)
+  .settings(libraryDependencies += "io.circe" %% "circe-generic" % v.circe)
   .dependsOn(core, serverNetty, adapterCirce)

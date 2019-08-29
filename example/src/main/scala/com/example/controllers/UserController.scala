@@ -3,36 +3,42 @@ package com.example.controllers
 import java.util.UUID
 
 import com.example.controllers.auth.AuthenticatedUserRequest
-import io.circe.Printer
 import monoton.http.{CirceJson, Form, FormMapping, Response}
 import monoton.server.{Controller, Handler}
 
 class UserController extends Controller {
+  import monoton.http.codec.circe._
 
   def create: Handler[Response] =
     for {
       userId <- request.to(AuthenticatedUserRequest).map(_.userId)
       json   <- request.body.as(CirceJson)
-      _      = println(json.pretty(Printer.spaces2))
-    } yield Ok(userId)
+    } yield Ok(json)
 
   final case class UserForm(id: UUID, name: String, age: Int)
 
   val form: FormMapping[UserForm] =
     Form.mapping("id", "name", "age")(UserForm.apply)
 
-  def update: Handler[Response] =
+  final case class UpdateResponseJson[A](success: Boolean, content: A)
+
+  def update: Handler[Response] = {
+    import io.circe.syntax._
+    import io.circe.generic.auto._
     for {
-      dto <- request.body.bindToForm(form) { errors =>
-        println("form mapping errors: " + errors)
-        BadRequest("form mapping error")
-      }
-      _ = println(dto)
-    } yield Ok("ok")
+      dto <- request.body.bindToForm(form)(
+        errors => BadRequest(UpdateResponseJson(success = false, errors.map(_.msg)).asJson)
+      )
+    } yield Ok(dto.asJson)
+  }
 
   def list: Handler[Response] =
     for {
       _ <- Handler.pure(println("start get users"))
+      _ <- request.queryString.getOption[Int]("number").map { i =>
+        println(s"query string number: $i")
+        i
+      }
       _ <- Handler.WIP // ここで打ち切ることができる
       name <- Handler.later[String] {
         println("read user from database")

@@ -1,6 +1,8 @@
 package monoton.server.netty
 
 import java.net.URI
+import java.util
+import java.util.function.{BiConsumer, Consumer}
 
 import scala.util.chaining._
 import scala.jdk.CollectionConverters._
@@ -11,17 +13,25 @@ import io.netty.handler.codec.http.multipart.{Attribute, HttpPostMultipartReques
 import monoton.http.{ContentType, Method, Request, RequestBody, Response}
 import monoton.util.Flow
 
+import scala.collection.mutable
+
 class HttpFlow extends Flow[HttpRequest, HttpResponse, Request, Response] {
   import HttpHeaderNames._, HttpHeaderValues._
 
   override def to(httpReq: HttpRequest): Either[HttpResponse, Request] = {
     val header = httpReq.headers.entries.asScala.map(e => (e.getKey, e.getValue)).toMap
     val uri    = new URI(httpReq.uri)
-    val query = Option(uri.getQuery)
-      .map(_.split('&').toList)
-      .map(_.map(_.split('=').toList))
-      .map(_.collect { case k :: v :: Nil => (k, v) }.toMap)
-      .getOrElse(Map.empty)
+    val queryString = {
+      val decoder = new QueryStringDecoder(httpReq.uri)
+      mutable.Map
+        .empty[String, Seq[String]]
+        .tap { buf =>
+          decoder.parameters.forEach { (t: String, u: util.List[String]) =>
+            buf += (t -> u.asScala.toList)
+          }
+        }
+        .toMap
+    }
     val rawBody = httpReq match {
       case fullReq: FullHttpRequest =>
         val buf = new Array[Byte](fullReq.content.readableBytes)
@@ -45,34 +55,27 @@ class HttpFlow extends Flow[HttpRequest, HttpResponse, Request, Response] {
             .map(Some(_))
       }
     } yield {
-      new Request {
-        override def method: Method                       = reqMethod
-        override def requestTarget: Request.RequestTarget = Request.RequestTarget.OriginForm(uri)
-        override def headers: Map[String, String]         = header
-
-        override def body: RequestBody = {
-          contentType match {
-            case Some(ContentType.`application/json`) =>
-              RequestBody.DefaultApplicationJson(rawBody)
-            case Some(ContentType.`text/plain`) =>
-              RequestBody.DefaultTextPlain(rawBody, None)
-            case Some(ContentType.`multipart/form-data`) =>
-              val decoder = new HttpPostMultipartRequestDecoder(httpReq)
-              val data = Iterator
-                .continually(decoder)
-                .takeWhile(_.hasNext())
-                .map { a =>
-                  val d = a.next()
-                  (d.getName, d.getHttpDataType, d)
-                }
-                .collect { case (name, HttpDataType.Attribute, d) => (name, d.asInstanceOf[Attribute].getValue) }
-                .toMap
-              RequestBody.DefaultMultipartFormData(data).tap(_ => decoder.destroy())
-            case _ =>
-              RequestBody.Empty
-          }
-        }
+      val body = contentType match {
+        case Some(ContentType.`application/json`) =>
+          RequestBody.DefaultApplicationJson(rawBody)
+        case Some(ContentType.`text/plain`) =>
+          RequestBody.DefaultTextPlain(rawBody, None)
+        case Some(ContentType.`multipart/form-data`) =>
+          val decoder = new HttpPostMultipartRequestDecoder(httpReq)
+          val data = Iterator
+            .continually(decoder)
+            .takeWhile(_.hasNext())
+            .map { a =>
+              val d = a.next()
+              (d.getName, d.getHttpDataType, d)
+            }
+            .collect { case (name, HttpDataType.Attribute, d) => (name, d.asInstanceOf[Attribute].getValue) }
+            .toMap
+          RequestBody.DefaultMultipartFormData(data)
+        case _ =>
+          RequestBody.Empty
       }
+      Request(reqMethod, uri, queryString, header, body)
     }
   }
 
