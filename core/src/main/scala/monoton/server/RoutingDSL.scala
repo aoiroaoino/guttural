@@ -14,14 +14,17 @@ trait RoutingDSL extends Router {
   private val _routes = ListBuffer.empty[RouteBuilder]
 
   def GET: RouteBuilder =
-    RouteBuilder(id = RouteBuilder.idGen.incrementAndGet(), method = Some(Method.GET)).tap(_routes += _)
+    RouteBuilder(id = RouteBuilder.idGen.incrementAndGet(), method = Some(Method.GET)).tap(upsert)
 
   def POST: RouteBuilder =
-    RouteBuilder(id = RouteBuilder.idGen.incrementAndGet(), method = Some(Method.POST)).tap(_routes += _)
+    RouteBuilder(id = RouteBuilder.idGen.incrementAndGet(), method = Some(Method.POST)).tap(upsert)
 
-  private[RoutingDSL] def upsert(id: Int, routeBuilder: RouteBuilder): Unit = {
-    val idx = _routes.indexWhere(_.id == id)
-    if (idx <= -1) _routes += routeBuilder else _routes.update(idx, routeBuilder)
+  def TODO: Handler[Response] = Handler.TODO
+  def WIP: Handler[Response]  = Handler.WIP
+
+  private[RoutingDSL] def upsert(routeBuilder: RouteBuilder): Unit = {
+    val idx = _routes.indexWhere(_.id == routeBuilder.id)
+    if (idx == -1) _routes += routeBuilder else _routes.update(idx, routeBuilder)
   }
 
   final case class RouteBuilder(
@@ -31,9 +34,9 @@ trait RoutingDSL extends Router {
       handler: Option[() => Handler[Response]] = None
   ) {
 
-    def >>(s: String): RouteBuilder = copy(path = Some(s)).tap(upsert(id, _))
+    def ~(s: String): RouteBuilder = copy(path = Some(s)).tap(upsert)
 
-    def to(h: => Handler[Response]): RouteBuilder = copy(handler = Some(() => h)).tap(upsert(id, _))
+    def to(h: => Handler[Response]): RouteBuilder = copy(handler = Some(() => h)).tap(upsert)
     def to(h: Response): RouteBuilder             = to(Handler.later(h))
     def to(h: Request => Response): RouteBuilder  = to(Handler.fromFunction(h))
 

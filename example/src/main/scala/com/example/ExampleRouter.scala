@@ -9,11 +9,15 @@ class ExampleRouter(
 ) extends RoutingDSL {
 
   // health check
-  POST >> "/echo"     to healthCheckController.echo
-  GET  >> "/ping"     to healthCheckController.ping
+  POST ~ "/echo"     to healthCheckController.echo
+  GET  ~ "/ping"     to healthCheckController.ping
 
   // users
-  GET  >> "/users"    to userController.list
-  POST >> "/users"    to userController.create
-  POST >> "/users/id" to userController.update // TODO: PUT と request からの値取得
+  GET  ~ "/users"    to userController.list
+  POST ~ "/users"    to userController.create
+  POST ~ "/users/id" to userController.update // TODO: PUT と request からの値取得
+
+  // oher
+  GET   ~ "/long/long/cat/path"   to TODO
+  POST  ~ "/foo/bar/baz/qux/path" to WIP
 }

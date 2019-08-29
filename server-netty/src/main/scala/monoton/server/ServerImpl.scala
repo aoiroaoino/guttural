@@ -12,6 +12,11 @@ class ServerImpl(port: Int, router: Router, requestExecutor: ExecutionContext) e
 
   override def start(): Unit = {
     println("Starting server(Netty) ...")
+    println("Routing table:")
+    println("")
+    println(router.showRoutes.map("  " + _).mkString("\n"))
+    println("")
+
     server.start()
   }
   override def stop(): Unit = println("stop")
