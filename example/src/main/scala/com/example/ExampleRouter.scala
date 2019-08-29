@@ -1,18 +1,19 @@
 package com.example
 
 import com.example.controllers.{HealthCheckController, UserController}
-import monoton.http.Method
-import monoton.server.{Route, Router}
+import monoton.server.RoutingDSL
 
 class ExampleRouter(
     healthCheckController: HealthCheckController,
     userController: UserController
-) {
-  val impl = Router(
-    Route(Method.POST, "/echo", healthCheckController.echo),
-    Route(Method.GET, "/ping", healthCheckController.ping),
-    Route(Method.POST, "/users", userController.create),
-    Route(Method.POST, "/users/id", userController.update), // TODO: PUT と path からの値取得
-    Route(Method.GET, "/users", userController.list)
-  )
+) extends RoutingDSL {
+
+  // health check
+  POST >> "/echo"     to healthCheckController.echo
+  GET  >> "/ping"     to healthCheckController.ping
+
+  // users
+  GET  >> "/users"    to userController.list
+  POST >> "/users"    to userController.create
+  POST >> "/users/id" to userController.update // TODO: PUT と request からの値取得
 }

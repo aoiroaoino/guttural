@@ -2,7 +2,6 @@ package monoton.server.netty
 
 import java.net.URI
 import java.util
-import java.util.function.{BiConsumer, Consumer}
 
 import scala.util.chaining._
 import scala.jdk.CollectionConverters._

@@ -26,10 +26,10 @@ class UserController extends Controller {
     import io.circe.syntax._
     import io.circe.generic.auto._
     for {
-      dto <- request.body.bindToForm(form)(
-        errors => BadRequest(UpdateResponseJson(success = false, errors.map(_.msg)).asJson)
-      )
-    } yield Ok(dto.asJson)
+      dto <- request.body.as(form, errors => {
+        BadRequest(UpdateResponseJson(success = false, errors.map(_.msg)).asJson)
+      })
+    } yield Ok(UpdateResponseJson(success = true, dto).asJson)
   }
 
   def list: Handler[Response] =

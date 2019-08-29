@@ -21,5 +21,5 @@ class ExampleModule {
     ExecutionContext.fromExecutor(es)
   }
 
-  val server: Server = new ServerImpl(serverPort, router.impl, requestExecutor)
+  val server: Server = new ServerImpl(serverPort, router, requestExecutor)
 }

@@ -47,14 +47,20 @@ trait Controller extends ResponseBuilders {
 
     object body {
 
-      def bindToForm[A](mapping: FormMapping[A])(handleErrors: List[MappingError] => Response): Handler[A] =
-        for {
-          req  <- Handler.getRequest
-          body <- Handler.rightValue(req.body.asMultipartFormData.attributes.to(mapping))(handleErrors)
-        } yield body
+      // form
 
-      def as[A](factory: JsonFactory[A]): Handler[A] =
-        Handler.getRequest.flatMap(req => Handler.someValue(req.body.asJson.to(factory))(BadRequest("")))
+      def as[A](mapping: FormMapping[A], ifError: List[MappingError] => Response): Handler[A] =
+        Handler.getRequest
+          .flatMap(req => Handler.rightValue(req.body.asMultipartFormData.attributes.to(mapping))(ifError))
+
+      def as[A](mapping: FormMapping[A]): Handler[A] = as(mapping, _ => BadRequest())
+
+      // json
+
+      def as[A](factory: JsonFactory[A], ifError: => Response): Handler[A] =
+        Handler.getRequest.flatMap(req => Handler.someValue(req.body.asJson.to(factory))(ifError))
+
+      def as[A](factory: JsonFactory[A]): Handler[A] = as(factory, BadRequest())
     }
   }
 }

@@ -4,7 +4,7 @@ import java.net.URI
 
 import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.handler.codec.http._
-import monoton.http.{Request, Response, ResponseBuilders}
+import monoton.http.ResponseBuilders
 import monoton.server.netty.filters.NotImplementedMethodFilter
 import monoton.server.{Handler, Router}
 

@@ -2,8 +2,9 @@ package monoton.server
 
 import monoton.http.Method
 
-sealed abstract class Router {
-  private[server] def routes: Seq[Route]
+abstract class Router {
+
+  protected def routes: Seq[Route]
 
   def findRoute(method: Method, path: String): Option[Route] =
     routes.collectFirst { case r if r.method == method && r.path == path => r }
