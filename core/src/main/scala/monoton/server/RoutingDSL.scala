@@ -9,7 +9,7 @@ import scala.util.chaining._
 
 trait RoutingDSL extends Router {
 
-  protected override def routes: Seq[Route] = _routes.map(_.build()).toSeq
+  protected override lazy val routes: Seq[Route] = _routes.map(_.build()).toSeq
 
   private val _routes = ListBuffer.empty[RouteBuilder]
 

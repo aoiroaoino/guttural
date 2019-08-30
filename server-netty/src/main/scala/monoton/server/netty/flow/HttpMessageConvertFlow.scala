@@ -15,7 +15,7 @@ import scala.collection.mutable
 import scala.jdk.CollectionConverters._
 import scala.util.chaining._
 
-class HttpFlow extends Flow[HttpRequest, HttpResponse, Request, Response] {
+class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Response] {
   import HttpHeaderNames._
 
   override def to(httpReq: HttpRequest): Either[HttpResponse, Request] = {
@@ -35,10 +35,10 @@ class HttpFlow extends Flow[HttpRequest, HttpResponse, Request, Response] {
     val rawBody = httpReq match {
       case fullReq: FullHttpRequest =>
         val buf = new Array[Byte](fullReq.content.readableBytes)
-        fullReq.content().retain()
-        fullReq.content().readBytes(buf)
+        fullReq.content().retain().readBytes(buf)
         buf
       case _ =>
+        // unsupported streaming request yet...
         Array.emptyByteArray
     }
     for {

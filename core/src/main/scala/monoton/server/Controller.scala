@@ -28,7 +28,7 @@ trait Controller extends ResponseBuilders {
         for {
           req <- Handler.getRequest
           a <- Handler.someValue(for {
-            vs <- req.requestTarget.asInstanceOf[OriginForm].query.get(key)
+            vs <- req.queryString.get(key)
             v  <- vs.headOption
             r  <- M.readOption(v)
           } yield r)(BadRequest())
@@ -38,7 +38,7 @@ trait Controller extends ResponseBuilders {
         for {
           req <- Handler.getRequest
           a <- Handler.pure(for {
-            vs <- req.requestTarget.asInstanceOf[OriginForm].query.get(key)
+            vs <- req.queryString.get(key)
             v  <- vs.headOption
             r  <- M.readOption(v)
           } yield r)

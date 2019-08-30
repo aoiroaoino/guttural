@@ -1,5 +1,5 @@
 package monoton.server.netty
-package filters
+package flow
 
 import io.netty.handler.codec.http.{HttpRequest, HttpResponse}
 import monoton.http.Method

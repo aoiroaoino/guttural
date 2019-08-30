@@ -9,17 +9,22 @@ import scala.util.control.NonFatal
 abstract class Request {
   import Request._
 
-  // start-line ( request-line )
+  // === start-line ( request-line )
   def method: Method
-  def requestTarget: RequestTarget
+
+  // request-target ( origin-form ) ※ その他三つは対応予定がないので、まずは origin-form 固定に。
+  def absolutePath: String
+//  def query: String
+  def queryString: Map[String, Seq[String]]
+
 //  def httpVersion: String
 
   // * ( header-field CRLF )
-//  def headers: Seq[HeaderField]
-  def headers: Map[String, String]
+  def headerFields: Map[String, String]
 
   // message-body
   def body: RequestBody
+//  def bodyAs[A]
 }
 
 object Request {
@@ -27,14 +32,10 @@ object Request {
   sealed abstract class RequestTarget extends Product with Serializable
 
   object RequestTarget {
-
     final case class OriginForm(absolutePath: String, query: Map[String, Seq[String]]) extends RequestTarget
-
-    final case class AbsoluteForm(absoluteURI: URI) extends RequestTarget
-
-    final case class AuthorityForm(authority: String) extends RequestTarget
-
-    case object AsteriskForm extends RequestTarget
+    final case class AbsoluteForm(absoluteURI: URI)                                    extends RequestTarget
+    final case class AuthorityForm(authority: String)                                  extends RequestTarget
+    case object AsteriskForm                                                           extends RequestTarget
   }
 
   // factory
@@ -45,19 +46,14 @@ object Request {
       headers: Map[String, String],
       body: RequestBody
   ): Request =
-    DefaultRequest(
-      method,
-      RequestTarget.OriginForm(uri.getPath, query), // TODO: support other target types
-      headers,
-      body
-    )
-
+    DefaultRequest(method, uri.getPath, query, headers, body)
 }
 
 final case class DefaultRequest(
     method: Method,
-    requestTarget: RequestTarget,
-    headers: Map[String, String],
+    absolutePath: String,
+    queryString: Map[String, Seq[String]],
+    headerFields: Map[String, String],
     body: RequestBody
 ) extends Request
 

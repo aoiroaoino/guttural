@@ -9,6 +9,8 @@ abstract class Router {
   def findRoute(method: Method, path: String): Option[Route] =
     routes.collectFirst { case r if r.method == method && r.path == path => r }
 
+  def isDefinedRouteAt(method: Method, path: String): Boolean = findRoute(method, path).isDefined
+
   def showRoutes: Seq[String] = routes.map(r => "%-7s %s".format(r.method, r.path))
 }
 
