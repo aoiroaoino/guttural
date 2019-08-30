@@ -1,21 +1,22 @@
-package monoton.server.netty
+package monoton.server.netty.flow
 
 import java.net.URI
 import java.util
 
-import scala.util.chaining._
-import scala.jdk.CollectionConverters._
 import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http._
 import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType
 import io.netty.handler.codec.http.multipart.{Attribute, HttpPostMultipartRequestDecoder}
-import monoton.http.{ContentType, Method, Request, RequestBody, Response}
+import monoton.http.{QueryStringDecoder => _, _}
+import monoton.server.netty.{BadRequest, InternalServerError}
 import monoton.util.Flow
 
 import scala.collection.mutable
+import scala.jdk.CollectionConverters._
+import scala.util.chaining._
 
 class HttpFlow extends Flow[HttpRequest, HttpResponse, Request, Response] {
-  import HttpHeaderNames._, HttpHeaderValues._
+  import HttpHeaderNames._
 
   override def to(httpReq: HttpRequest): Either[HttpResponse, Request] = {
     val header = httpReq.headers.entries.asScala.map(e => (e.getKey, e.getValue)).toMap
@@ -34,7 +35,8 @@ class HttpFlow extends Flow[HttpRequest, HttpResponse, Request, Response] {
     val rawBody = httpReq match {
       case fullReq: FullHttpRequest =>
         val buf = new Array[Byte](fullReq.content.readableBytes)
-        fullReq.content.duplicate.readBytes(buf)
+        fullReq.content().retain()
+        fullReq.content().readBytes(buf)
         buf
       case _ =>
         Array.emptyByteArray
@@ -79,6 +81,10 @@ class HttpFlow extends Flow[HttpRequest, HttpResponse, Request, Response] {
   }
 
   override def from(res: Response, httpReq: HttpRequest): HttpResponse = {
+    httpReq match {
+//      case r: FullHttpRequest => r.release()
+      case _ => // nop
+    }
     val status = HttpResponseStatus.valueOf(res.status.code)
     val content =
       if (res.content.isEmpty) Unpooled.EMPTY_BUFFER
