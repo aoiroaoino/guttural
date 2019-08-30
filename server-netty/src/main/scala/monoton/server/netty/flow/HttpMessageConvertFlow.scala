@@ -7,6 +7,7 @@ import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http._
 import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType
 import io.netty.handler.codec.http.multipart.{Attribute, HttpPostMultipartRequestDecoder}
+import io.netty.util.ReferenceCountUtil
 import monoton.http.{QueryStringDecoder => _, _}
 import monoton.server.netty.{BadRequest, InternalServerError}
 import monoton.util.Flow
@@ -32,15 +33,6 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
         }
         .toMap
     }
-    val rawBody = httpReq match {
-      case fullReq: FullHttpRequest =>
-        val buf = new Array[Byte](fullReq.content.readableBytes)
-        fullReq.content().retain().readBytes(buf)
-        buf
-      case _ =>
-        // unsupported streaming request yet...
-        Array.emptyByteArray
-    }
     for {
       reqMethod <- Method
         .fromString(httpReq.method.name)
@@ -56,11 +48,21 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
             .map(Some(_))
       }
     } yield {
+      def readRawBody(): Array[Byte] =
+        httpReq match {
+          case fullReq: FullHttpRequest =>
+            val buf = new Array[Byte](fullReq.content.readableBytes())
+            fullReq.content().readBytes(buf)
+            buf
+          case _ =>
+            // unsupported streaming request yet...
+            Array.emptyByteArray
+        }
       val body = contentType match {
         case Some(ContentType.`application/json`) =>
-          RequestBody.DefaultApplicationJson(rawBody)
+          RequestBody.DefaultApplicationJson(readRawBody())
         case Some(ContentType.`text/plain`) =>
-          RequestBody.DefaultTextPlain(rawBody, None)
+          RequestBody.DefaultTextPlain(readRawBody(), None)
         case Some(ContentType.`multipart/form-data`) =>
           val decoder = new HttpPostMultipartRequestDecoder(httpReq)
           val data = Iterator
@@ -72,7 +74,7 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
             }
             .collect { case (name, HttpDataType.Attribute, d) => (name, d.asInstanceOf[Attribute].getValue) }
             .toMap
-          RequestBody.DefaultMultipartFormData(data)
+          RequestBody.DefaultMultipartFormData(data).tap(_ => decoder.destroy())
         case _ =>
           RequestBody.Empty
       }
