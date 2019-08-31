@@ -4,18 +4,14 @@ import monoton.http.Method
 
 abstract class Router {
 
-  protected def routes: Seq[Route]
+  def routings: Seq[Routing]
 
-  def findRoute(method: Method, path: String): Option[Route] =
-    routes.collectFirst { case r if r.method == method && r.path == path => r }
+  def routes: Seq[Route] = routings.map(_.route)
 
-  def isDefinedRouteAt(method: Method, path: String): Boolean = findRoute(method, path).isDefined
+  def findRouting(method: Method, path: String): Option[Routing] =
+    routings.collectFirst { case r if r.method == method && r.route.isMatch(path) => r }
 
-  def showRoutes: Seq[String] = routes.map(r => "%-7s %s".format(r.method, r.path))
-}
+  def isDefinedRouteAt(method: Method, path: String): Boolean = findRouting(method, path).isDefined
 
-object Router {
-  def apply(rs: Route*): Router = new Router {
-    override def routes: Seq[Route] = rs.toSeq
-  }
+  def showRoutes: Seq[String] = routings.map(r => "%-7s %s".format(r.method, r.path))
 }

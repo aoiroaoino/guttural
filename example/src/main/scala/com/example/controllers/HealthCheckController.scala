@@ -1,13 +1,10 @@
 package com.example.controllers
 
-import monoton.http.{Request, Response}
-import monoton.server.Controller
+import monoton.server.{Controller, Handler}
 
 class HealthCheckController extends Controller {
 
   def ping: ConstHandler = Ok("pong")
 
-  def echo: Request => Response = { req =>
-    Ok(req.body.asText)
-  }
+  def echo = Handler.getRequest.map(req => Ok(req.body.asText))
 }

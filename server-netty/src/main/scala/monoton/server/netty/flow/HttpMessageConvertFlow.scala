@@ -7,7 +7,6 @@ import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http._
 import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType
 import io.netty.handler.codec.http.multipart.{Attribute, HttpPostMultipartRequestDecoder}
-import io.netty.util.ReferenceCountUtil
 import monoton.http.{QueryStringDecoder => _, _}
 import monoton.server.netty.{BadRequest, InternalServerError}
 import monoton.util.Flow
@@ -74,7 +73,7 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
             }
             .collect { case (name, HttpDataType.Attribute, d) => (name, d.asInstanceOf[Attribute].getValue) }
             .toMap
-          RequestBody.DefaultMultipartFormData(data).tap(_ => decoder.destroy())
+          RequestBody.DefaultMultipartFormData(data).tap(_ => decoder.destroy()).tap(println)
         case _ =>
           RequestBody.Empty
       }

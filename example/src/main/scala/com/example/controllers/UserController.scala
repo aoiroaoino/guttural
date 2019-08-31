@@ -22,7 +22,7 @@ class UserController extends Controller {
 
   final case class UpdateResponseJson[A](success: Boolean, content: A)
 
-  def update: Handler[Response] = {
+  def update(userId: UUID): Handler[Response] = {
     import io.circe.syntax._
     import io.circe.generic.auto._
     for {
@@ -31,6 +31,9 @@ class UserController extends Controller {
       })
     } yield Ok(UpdateResponseJson(success = true, dto).asJson)
   }
+
+  def modifyTag(userId: UUID, tagId: Int): Handler[Response] =
+    Handler.pure(Ok(s"userId: $userId, tagId: $tagId"))
 
   def list: Handler[Response] =
     for {
