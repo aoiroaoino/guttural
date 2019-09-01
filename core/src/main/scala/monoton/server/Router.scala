@@ -8,8 +8,9 @@ abstract class Router {
 
   def routes: Seq[Route] = routings.map(_.route)
 
-  def findRouting(method: Method, path: String): Option[Routing] =
-    routings.collectFirst { case r if r.method == method && r.route.isMatch(path) => r }
+  def findRouting(method: Method, path: String): Option[Routing] = {
+    routings.collectFirst { case r if r.route.isMatching(method, path) => r }
+  }
 
   def isDefinedRouteAt(method: Method, path: String): Boolean = findRouting(method, path).isDefined
 

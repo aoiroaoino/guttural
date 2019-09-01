@@ -2,7 +2,9 @@ package monoton.http
 
 import java.nio.charset.StandardCharsets
 
-final case class Response(status: Status, contentType: ContentType, content: Array[Byte])
+final case class Response(status: Status, contentType: ContentType, content: Array[Byte]) {
+  def clearContent: Response = copy(content = Array.emptyByteArray)
+}
 
 object Response {}
 

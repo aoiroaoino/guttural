@@ -19,7 +19,7 @@ object Method {
     all.find(_.token == s.toUpperCase) // case-insensitive
 
   // current supported methods
-  private val supportedMethods = Seq(GET, HEAD, POST, PUT)
+  private val supportedMethods = Seq(GET, HEAD, POST, PUT, DELETE)
   def isSupported(method: Method): Boolean =
     supportedMethods.contains(method)
 }

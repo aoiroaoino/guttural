@@ -1,9 +1,7 @@
 package com.example
 
-import java.util.UUID
-
 import com.example.controllers.{HealthCheckController, UserController}
-import monoton.server.RoutingDSL
+import monoton.server.{Handler, RoutingDSL}
 
 class ExampleRouter(
     healthCheckController: HealthCheckController,
@@ -21,6 +19,6 @@ class ExampleRouter(
   PUT  ~ "/users/{userId}/tags/{tagId}" to userController.modifyTag _
 
   // other
-  GET  ~ "/long/long/cat/path"   to TODO
-  POST ~ "/foo/bar/baz/qux/path" to WIP
+  GET  ~ "/long/long/cat/path"   to Handler.TODO
+  POST ~ "/foo/bar/baz/qux/path" to Handler.WIP
 }

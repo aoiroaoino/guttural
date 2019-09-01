@@ -14,17 +14,13 @@ trait RoutingDSL extends Router {
 
   private val builders = ListBuffer.empty[RoutingBuilder]
 
-  def GET: RoutingBuilder =
-    RoutingBuilder(id = RoutingBuilder.idGen.incrementAndGet(), method = Some(Method.GET)).tap(upsert)
+  def GET: RoutingBuilder    = createAndRegister(Method.GET)
+  def POST: RoutingBuilder   = createAndRegister(Method.POST)
+  def PUT: RoutingBuilder    = createAndRegister(Method.PUT)
+  def DELETE: RoutingBuilder = createAndRegister(Method.DELETE)
 
-  def POST: RoutingBuilder =
-    RoutingBuilder(id = RoutingBuilder.idGen.incrementAndGet(), method = Some(Method.POST)).tap(upsert)
-
-  def PUT: RoutingBuilder =
-    RoutingBuilder(id = RoutingBuilder.idGen.incrementAndGet(), method = Some(Method.PUT)).tap(upsert)
-
-  def TODO: Handler[Response] = Handler.TODO
-  def WIP: Handler[Response]  = Handler.WIP
+  private def createAndRegister(method: Method): RoutingBuilder =
+    RoutingBuilder.create(method).tap(upsert)
 
   private[RoutingDSL] def upsert(routeBuilder: RoutingBuilder): Unit = {
     val idx = builders.indexWhere(_.id == routeBuilder.id)
@@ -90,5 +86,11 @@ trait RoutingDSL extends Router {
 
   object RoutingBuilder {
     private[RoutingDSL] val idGen: AtomicInteger = new AtomicInteger(0)
+
+    private[RoutingDSL] def create(method: Method): RoutingBuilder =
+      RoutingBuilder(
+        id = RoutingBuilder.idGen.incrementAndGet(),
+        method = Some(method),
+      )
   }
 }

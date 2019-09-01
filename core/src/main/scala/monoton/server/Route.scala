@@ -8,20 +8,28 @@ class Route(val method: Method, val path: String) {
   val segments: Seq[String]        = path.split('/').toSeq
   val patternSegments: Seq[String] = segments.collect { case placeholderPattern(key) => key }
 
-  def getPathParams(targetPath: String): Map[String, String] = {
-    if (isMatch(targetPath)) {
-      val targetPathSegments = targetPath.split('/').toSeq
+  def getPathParams(requestPath: String): Map[String, String] = {
+    if (isMatchingPath(requestPath)) {
+      val targetPathSegments = requestPath.split('/').toSeq
       segments.zip(targetPathSegments).collect { case (placeholderPattern(s), t) => (s, t) }.toMap
     } else {
       Map.empty
     }
   }
 
-  def isMatch(targetPath: String): Boolean =
+  final def isMatching(requestMethod: Method, requestPath: String): Boolean =
+    isMatchingMethod(requestMethod) && isMatchingPath(requestPath)
+
+  // HEAD リクエストの場合は GET リクエストも一致とみなす
+  private[monoton] def isMatchingMethod(requestMethod: Method): Boolean =
+    if (requestMethod == Method.HEAD) method == Method.HEAD || method == Method.GET
+    else method == requestMethod
+
+  private[monoton] def isMatchingPath(requestPath: String): Boolean =
     if (patternSegments.isEmpty) {
-      path == targetPath
+      path == requestPath
     } else {
-      val targetPathSegments = targetPath.split('/').toSeq
+      val targetPathSegments = requestPath.split('/').toSeq
       if (targetPathSegments.nonEmpty && segments.length == targetPathSegments.length) {
         segments.zip(targetPathSegments).forall {
           case (placeholderPattern(_), _) => true
