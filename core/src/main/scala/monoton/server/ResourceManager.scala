@@ -1,12 +1,11 @@
 package monoton.server
 
 import monoton.http.FormMapping.MappingError
-import monoton.http.Request.RequestTarget.OriginForm
 import monoton.http.RequestBody.JsonFactory
 import monoton.http.{FormMapping, Request, Response, ResponseBuilders}
 import monoton.util.Read
 
-trait Controller extends ResponseBuilders {
+trait ResourceManager extends ResponseBuilders {
 
   type RequestHandler = Handler[Response]
   type SimpleHandler  = Request => Response

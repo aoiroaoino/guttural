@@ -1,8 +1,8 @@
 package com.example.controllers
 
-import monoton.server.{Controller, Handler}
+import monoton.server.{Handler, ResourceManager}
 
-class HealthCheckController extends Controller {
+class HealthCheckResourceManager extends ResourceManager {
 
   def ping: ConstHandler = Ok("pong")
 

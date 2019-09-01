@@ -4,9 +4,9 @@ import java.util.UUID
 
 import com.example.controllers.auth.AuthenticatedUserRequest
 import monoton.http.{CirceJson, Form, FormMapping, Response}
-import monoton.server.{Controller, Handler}
+import monoton.server.{Handler, ResourceManager}
 
-class UserController extends Controller {
+class UserResourceManager extends ResourceManager {
   import monoton.http.codec.circe._
 
   def create: Handler[Response] =
