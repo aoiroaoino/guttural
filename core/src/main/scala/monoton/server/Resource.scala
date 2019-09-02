@@ -5,11 +5,9 @@ import monoton.http.RequestBody.JsonFactory
 import monoton.http.{FormMapping, Request, Response, ResponseBuilders}
 import monoton.util.Read
 
-trait ResourceManager extends ResponseBuilders {
+trait Resource extends ResponseBuilders {
 
   type RequestHandler = Handler[Response]
-  type SimpleHandler  = Request => Response
-  type ConstHandler   = Response
 
   object request {
 

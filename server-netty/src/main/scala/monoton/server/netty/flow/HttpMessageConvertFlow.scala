@@ -38,7 +38,7 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
         .filter(Method.isSupported)
         .toRight(InternalServerError(httpReq.protocolVersion, "Unsupported Method"))
       contentType <- {
-        if (reqMethod == Method.GET || reqMethod == Method.HEAD) Right(None)
+        if (reqMethod == Method.GET || reqMethod == Method.HEAD || reqMethod == Method.DELETE) Right(None)
         else
           Option(httpReq.headers.get(CONTENT_TYPE))
             .map(_.split(';')(0).trim) // TODO

@@ -4,9 +4,10 @@ import java.util.UUID
 
 import com.example.controllers.auth.AuthenticatedUserRequest
 import monoton.http.{CirceJson, Form, FormMapping, Response}
-import monoton.server.{Handler, ResourceManager}
+import monoton.server.{Handler, Resource}
 
-class UserResourceManager extends ResourceManager {
+class UserResource extends Resource {
+  import UserResource._
   import monoton.http.codec.circe._
 
   def create: Handler[Response] =
@@ -14,13 +15,6 @@ class UserResourceManager extends ResourceManager {
       userId <- request.to(AuthenticatedUserRequest).map(_.userId)
       json   <- request.body.as(CirceJson)
     } yield Ok(json)
-
-  final case class UserForm(id: UUID, name: String, age: Int)
-
-  val form: FormMapping[UserForm] =
-    Form.mapping("id", "name", "age")(UserForm.apply)
-
-  final case class UpdateResponseJson[A](success: Boolean, content: A)
 
   def update(userId: UUID): Handler[Response] = {
     import io.circe.syntax._
@@ -48,4 +42,14 @@ class UserResourceManager extends ResourceManager {
         throw new Exception("no connection")
       }
     } yield Ok(name)
+}
+
+object UserResource {
+
+  final case class UserForm(id: UUID, name: String, age: Int)
+
+  val form: FormMapping[UserForm] =
+    Form.mapping("id", "name", "age")(UserForm.apply)
+
+  final case class UpdateResponseJson[A](success: Boolean, content: A)
 }

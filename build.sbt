@@ -21,6 +21,8 @@ lazy val commonSettings = Seq(
   crossScalaVersions := Seq(v.scala213, v.scala212),
   scalacOptions ++= Seq(
     "-feature",
+    "-unchecked",
+    "-deprecation"
   )
 )
 

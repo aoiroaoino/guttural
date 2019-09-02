@@ -1,19 +1,19 @@
 package com.example
 
-import com.example.controllers.{HealthCheckResourceManager, UserResourceManager}
+import com.example.controllers.{HealthCheckResource, UserResource}
 import monoton.server.{Handler, RoutingDSL}
 
 class ExampleRouter(
-    healthCheckController: HealthCheckResourceManager,
-    userResourceManager: UserResourceManager
+    healthCheckResource: HealthCheckResource,
+    userResource: UserResource
 ) extends RoutingDSL {
 
   // health check
-  POST ~ "/echo" to healthCheckController.echo
-  GET  ~ "/ping" to healthCheckController.ping
+  POST ~ "/echo" to healthCheckResource.echo
+  GET  ~ "/ping" to healthCheckResource.ping
 
   // users
-  resource(userResourceManager) { user =>
+  resource(userResource) { user =>
     GET  ~ "/users"                       to user.list
     POST ~ "/users"                       to user.create
     PUT  ~ "/users/{userId}"              to user.update _
