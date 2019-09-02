@@ -56,6 +56,15 @@ object RequestBody {
     override def asJson: AsJson                   = AsJson.Just(bytes)
   }
 
+  abstract class ApplicationOctetStream extends RequestBody {
+    override def asMultipartFormData: AsForm = AsForm.NotConvertible
+  }
+  final case class DefaultApplicationOctetStream(bytes: Array[Byte]) extends ApplicationOctetStream {
+    override def asBytes: Array[Byte]             = bytes
+    override def asText(charset: Charset): String = new String(bytes, charset)
+    override def asJson: AsJson                   = AsJson.Just(bytes)
+  }
+
   // multipart/form-data
 
   abstract class MultipartFormData extends RequestBody {

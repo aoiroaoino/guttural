@@ -37,15 +37,10 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
         .fromString(httpReq.method.name)
         .filter(Method.isSupported)
         .toRight(InternalServerError(httpReq.protocolVersion, "Unsupported Method"))
-      contentType <- {
-        if (reqMethod == Method.GET || reqMethod == Method.HEAD || reqMethod == Method.DELETE) Right(None)
-        else
-          Option(httpReq.headers.get(CONTENT_TYPE))
-            .map(_.split(';')(0).trim) // TODO
-            .flatMap(ContentType.fromString)
-            .toRight(BadRequest(httpReq.protocolVersion, "Missing Content-Type"))
-            .map(Some(_))
-      }
+      contentType = Option(httpReq.headers.get(CONTENT_TYPE)) // nullable
+        .map(_.split(';')(0).trim) // TODO
+        .flatMap(ContentType.fromString)
+        .getOrElse(ContentType.`application/octet-stream`)
     } yield {
       def readRawBody(): Array[Byte] =
         httpReq match {
@@ -58,11 +53,11 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
             Array.emptyByteArray
         }
       val body = contentType match {
-        case Some(ContentType.`application/json`) =>
+        case ContentType.`application/json` =>
           RequestBody.DefaultApplicationJson(readRawBody())
-        case Some(ContentType.`text/plain`) =>
+        case ContentType.`text/plain` =>
           RequestBody.DefaultTextPlain(readRawBody(), None)
-        case Some(ContentType.`multipart/form-data`) =>
+        case ContentType.`multipart/form-data` =>
           val decoder = new HttpPostMultipartRequestDecoder(httpReq)
           val data = Iterator
             .continually(decoder)
@@ -74,8 +69,10 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
             .collect { case (name, HttpDataType.Attribute, d) => (name, d.asInstanceOf[Attribute].getValue) }
             .toMap
           RequestBody.DefaultMultipartFormData(data).tap(_ => decoder.destroy()).tap(println)
+        case ContentType.`application/octet-stream` =>
+          RequestBody.DefaultApplicationOctetStream(readRawBody())
         case _ =>
-          RequestBody.Empty
+          RequestBody.Empty // invalid content type
       }
       Request(reqMethod, uri, queryString, header, body)
     }
