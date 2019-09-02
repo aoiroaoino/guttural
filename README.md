@@ -4,20 +4,19 @@ Web Framework for Scala.
 
 ## Quick Start
 
+### build settings
+
 ```sbt
-libraryDependencies += "dev.aoiroaoino" %% "monoton" % "0.1.0-SNAPSHOT"
+addSbtPlugin("dev.aoiroaoino" % "monoton-plugin" % "0.1.0-SNAPSHOT")
+```
+and
+```sbt
+lazy val httpServer = project
+  .settings( /* your settings */ )
+  .enablePlugins(MonotonPlugin)
 ```
 
-```scala
-import monoton.server.RoutingDSL
-import monoton.util.Read
-// Write other imports
-
-class MyRouter(statusResource: StatusResource) extends RoutingDSL {
-
-  GET ~ "/ping" to statusResource.ping
-}
-```
+### Define Resources
 
 ```scala
 import monoton.http.Response
@@ -30,22 +29,34 @@ class StatusResource extends Resource {
 }
 ```
 
+### Define Router
+
 ```scala
-import com.google.inject.Guice
-import monoton.server.{Router, ServerImpl}
+import javax.inject.Inject
+import monoton.server.RoutingDSL
+import monoton.util.Read
 // Write other imports
 
-object Main extends App {
+class MyRouter @Inject()(statusResource: StatusResource) extends RoutingDSL {
 
-  val statusController = new StatusController
-  val router = new MyRouter(statusController, userController)
+  GET ~ "/ping" to statusResource.ping
+}
+```
 
-  val server = new ServerImpl(
-    port = 8080,
-    router = router,
-    requestExecutor = ExecutionContext.global
-  )
+### Define AppModule
 
-  server.start()
+```scala
+import scala.concurrent.ExecutionContext
+import com.google.inject.AbstractModule
+import monoton.server.Router
+// Write other imports
+
+class AppModule extends AbstractModule {
+
+  override def configure(): Unit = {
+    bind(classOf[Int]).toInstance(8080) // port
+    bind(classOf[ExecutionContext]).toInstance(ExecutionContext.global)
+    bind(classOf[Router]).to(classOf[MyRouter])
+  }
 }
 ```
