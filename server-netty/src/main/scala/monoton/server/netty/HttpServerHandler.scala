@@ -3,7 +3,7 @@ package monoton.server.netty
 import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.handler.codec.http._
 import io.netty.util.ReferenceCountUtil
-import monoton.server.netty.flow.{HEADMethodFilter, HttpMessageConvertFlow, NotImplementedMethodFilter, RoutingFlow}
+import monoton.server.netty.flow.{HEADMethodFilter, HttpMessageConvertFlow, RoutingFlow}
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
@@ -18,9 +18,8 @@ class HttpServerHandler(
   private implicit val ec: ExecutionContext = executor
 
   val httpRequestFlow =
-  NotImplementedMethodFilter |> // up: FW でサポートしていない HTTP Method を除く
-  httpMessageConvertFlow |>     // up: Netty の HttpRequest を Request へ, down: Response を Netty の HttpResponse へ
-  HEADMethodFilter |>           // down: HEAD リクエストは Response の body を空にする
+  httpMessageConvertFlow |> // up: Netty の HttpRequest を Request へ, down: Response を Netty の HttpResponse へ
+  HEADMethodFilter |>       // down: HEAD リクエストは Response の body を空にする
   routingFlow
 
   override def channelRead0(ctx: ChannelHandlerContext, msg: HttpRequest): Unit = {
