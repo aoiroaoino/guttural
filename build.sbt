@@ -26,6 +26,13 @@ lazy val commonSettings = Seq(
   )
 )
 
+lazy val guiceSettings = Seq(
+  libraryDependencies ++= Seq(
+    "javax.inject" % "javax.inject" % "1",
+    "com.google.inject" % "guice" % "4.2.2"
+  )
+)
+
 lazy val root = (project in file("."))
   .settings(commonSettings)
   .aggregate(core, serverNetty, serverAkkaHttp, adapterCirce)
@@ -35,9 +42,18 @@ lazy val core = project
   .settings(moduleName := "monoton-core")
   .settings(commonSettings)
 
+lazy val plugin = project
+  .settings(moduleName := "monoton-plugin")
+  .settings(Seq( // plugin settings
+    sbtPlugin := true,
+    sbtVersion := "1.2.8",
+    scalaVersion := v.scala212
+  ))
+
 lazy val serverNetty = (project in file("server-netty"))
   .settings(moduleName := "monoton-server-netty")
   .settings(commonSettings)
+  .settings(guiceSettings)
   .settings(libraryDependencies ++= Seq(
     "io.netty" % "netty-all" % v.netty,
     "org.slf4j" % "slf4j-api" % v.slf4jApi

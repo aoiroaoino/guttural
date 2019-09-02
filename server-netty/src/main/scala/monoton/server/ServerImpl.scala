@@ -1,11 +1,12 @@
 package monoton.server
 
+import javax.inject.Inject
 import monoton.server.netty.flow.{HttpMessageConvertFlow, RoutingFlow}
 import monoton.server.netty.{HttpServerHandlerProvider, HttpServerInitializer, NettyServer}
 
 import scala.concurrent.ExecutionContext
 
-class ServerImpl(port: Int, router: Router, requestExecutor: ExecutionContext) extends Server {
+class ServerImpl @Inject()(port: Int, router: Router, requestExecutor: ExecutionContext) extends Server {
   private[this] val routingFlow = new RoutingFlow(router)
   private[this] val httpDriver  = new HttpMessageConvertFlow
   private[this] val provider    = new HttpServerHandlerProvider(httpDriver, routingFlow, requestExecutor)
