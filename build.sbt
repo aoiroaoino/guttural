@@ -78,9 +78,17 @@ lazy val adapterCirce = (project in file("adapter-circe"))
   ))
   .dependsOn(core)
 
+lazy val adapterCodecPlayJson = (project in file("adapter-codec-play-json"))
+  .settings(moduleName := "monoton-adapter-codec-play-json")
+  .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq(
+    "com.typesafe.play" %% "play-json" % "2.8.0-M5"
+  ))
+  .dependsOn(core)
+
 // TODO: move to other repository
 lazy val example = project
   .settings(moduleName := "monoton-example")
   .settings(commonSettings)
   .settings(libraryDependencies += "io.circe" %% "circe-generic" % v.circe)
-  .dependsOn(core, serverNetty, adapterCirce)
+  .dependsOn(core, serverNetty, adapterCirce, adapterCodecPlayJson)

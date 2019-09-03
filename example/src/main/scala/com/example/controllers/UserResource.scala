@@ -3,17 +3,20 @@ package com.example.controllers
 import java.util.UUID
 
 import com.example.controllers.auth.AuthenticatedUserRequest
+import monoton.http.codec.PlayJsValue
 import monoton.http.{CirceJson, Form, FormMapping, Response}
 import monoton.server.{Handler, Resource}
 
 class UserResource extends Resource {
   import UserResource._
   import monoton.http.codec.circe._
+  import monoton.http.codec.playjson._
 
   def create: Handler[Response] =
     for {
       userId <- request.to(AuthenticatedUserRequest).map(_.userId)
-      json   <- request.body.as(CirceJson)
+      json   <- request.body.as(PlayJsValue)
+      _      = println(json)
     } yield Ok(json)
 
   def update(userId: UUID): Handler[Response] = {
