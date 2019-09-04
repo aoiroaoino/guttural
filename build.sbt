@@ -35,8 +35,8 @@ lazy val guiceSettings = Seq(
 
 lazy val root = (project in file("."))
   .settings(commonSettings)
-  .aggregate(core, serverNetty, serverAkkaHttp, adapterCirce)
-  .dependsOn(core, serverNetty, serverAkkaHttp, adapterCirce)
+  .aggregate(core, serverNetty, serverAkkaHttp, adapterCirce, adapterCodecPlayJson)
+  .dependsOn(core, serverNetty, serverAkkaHttp, adapterCirce, adapterCodecPlayJson)
 
 lazy val core = project
   .settings(moduleName := "monoton-core")
