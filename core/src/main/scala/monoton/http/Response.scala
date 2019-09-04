@@ -18,7 +18,7 @@ object ContentEncoder {
     override def encode(a: String): Array[Byte]  = a.getBytes(StandardCharsets.UTF_8)
   }
   implicit val unitEncoder: ContentEncoder[Unit] = new ContentEncoder[Unit] {
-    override def defaultContentType: ContentType = ContentType.`text/plain`
+    override def defaultContentType: ContentType = ContentType.`application/octet-stream`
     override def encode(a: Unit): Array[Byte]    = Array.emptyByteArray
   }
 }

@@ -3,9 +3,10 @@ package monoton.server
 import monoton.http.FormMapping.MappingError
 import monoton.http.RequestBody.JsonFactory
 import monoton.http.{FormMapping, Request, Response, ResponseBuilders}
+import monoton.syntax.AllSyntax
 import monoton.util.Read
 
-trait Resource extends ResponseBuilders {
+trait Resource extends ResponseBuilders with AllSyntax {
 
   type RequestHandler = Handler[Response]
 
@@ -16,8 +17,6 @@ trait Resource extends ResponseBuilders {
         req <- Handler.getRequest
         a   <- Handler.someValue(factory.from(req))(factory.onFailure(req))
       } yield a
-
-//    def toGETRequest(): Handler[GETRequest] = ???
 
     object queryString {
 
