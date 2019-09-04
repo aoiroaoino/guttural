@@ -14,12 +14,14 @@ object Method {
   case object OPTIONS extends Method("OPTIONS")
   case object TRACE   extends Method("TRACE")
 
-  private val all = Seq(GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE)
+  case object PATCH extends Method("PATCH")
+
+  private val all = Seq(GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH)
   def fromString(s: String): Option[Method] =
     all.find(_.token == s.toUpperCase) // case-insensitive
 
   // current supported methods
-  private val supportedMethods = Seq(GET, HEAD, POST, PUT, DELETE)
+  private val supportedMethods = Seq(GET, HEAD, POST, PUT, DELETE, PATCH)
   def isSupported(method: Method): Boolean =
     supportedMethods.contains(method)
 }

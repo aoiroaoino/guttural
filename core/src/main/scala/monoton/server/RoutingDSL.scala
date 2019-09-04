@@ -18,6 +18,7 @@ trait RoutingDSL extends Router {
   def POST: RoutingBuilder   = createAndRegister(Method.POST)
   def PUT: RoutingBuilder    = createAndRegister(Method.PUT)
   def DELETE: RoutingBuilder = createAndRegister(Method.DELETE)
+  def PATCH: RoutingBuilder  = createAndRegister(Method.PATCH)
 
   def resource[A <: Resource](resourceManager: A)(f: A => Unit): Unit = f(resourceManager)
 
