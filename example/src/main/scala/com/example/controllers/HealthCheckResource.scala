@@ -8,7 +8,7 @@ import monoton.server.{Handler, Resource}
 
 class HealthCheckResource extends Resource {
 
-  def ping: Handler[Response] = Handler.pure(Ok("pong"))
+  def ping: Handler[Response] = Ok("pong")
 
   def echo = Handler.getRequest.map(req => Ok(req.body.asText))
 

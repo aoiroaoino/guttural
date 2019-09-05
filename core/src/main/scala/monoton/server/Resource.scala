@@ -10,6 +10,9 @@ trait Resource extends ResponseBuilders with AllSyntax {
 
   type RequestHandler = Handler[Response]
 
+  // 一貫性がなくなるが、固定値の Response は直接書けるでもいいかな？という実験的な目論見で追加してみる。
+  implicit def constResponseToHandlerResponse(res: Response): Handler[Response] = Handler.pure(res)
+
   object request {
 
     def to[A](factory: RequestFactory[A]): Handler[A] =
