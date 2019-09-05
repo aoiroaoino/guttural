@@ -1,22 +1,31 @@
-package monoton.server.netty.flow
+package monoton.server.netty
+package flow
 
 import java.net.URI
 import java.util
 
 import io.netty.buffer.Unpooled
-import io.netty.handler.codec.http._
+import io.netty.handler.codec.http.{
+  DefaultFullHttpResponse,
+  FullHttpRequest,
+  HttpHeaderNames,
+  HttpRequest,
+  HttpResponse,
+  HttpResponseStatus,
+  QueryStringDecoder
+}
+import io.netty.handler.codec.http.cookie.ServerCookieDecoder
 import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType
 import io.netty.handler.codec.http.multipart.{Attribute, HttpPostMultipartRequestDecoder}
 import monoton.http.{QueryStringDecoder => _, _}
-import monoton.server.netty.{BadRequest, InternalServerError}
 import monoton.util.Flow
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters._
 import scala.util.chaining._
 
 class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Response] {
-  import HttpHeaderNames._
 
   override def to(httpReq: HttpRequest): Either[HttpResponse, Request] = {
     val header = httpReq.headers.entries.asScala.map(e => (e.getKey, e.getValue)).toMap
@@ -32,12 +41,22 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
         }
         .toMap
     }
+    val cookies = httpReq match {
+      case fullReq: FullHttpRequest =>
+        Option(fullReq.headers.get(HttpHeaderNames.COOKIE)).fold(Cookies.empty) { cookieStr =>
+          val buf: mutable.ArrayBuffer[Cookie] = ArrayBuffer.empty
+          ServerCookieDecoder.STRICT.decode(cookieStr).forEach(c => buf.addOne(Cookie(c.name, c.value)))
+          new Cookies(buf.toSeq)
+        }
+      case _ =>
+        Cookies.empty
+    }
     for {
       reqMethod <- Method
         .fromString(httpReq.method.name)
         .filter(Method.isSupported)
         .toRight(InternalServerError(httpReq.protocolVersion, "Unsupported Method"))
-      contentType = Option(httpReq.headers.get(CONTENT_TYPE)) // nullable
+      contentType = Option(httpReq.headers.get(HttpHeaderNames.CONTENT_TYPE)) // nullable
         .map(_.split(';')(0).trim) // TODO
         .flatMap(ContentType.fromString)
         .getOrElse(ContentType.`application/octet-stream`)
@@ -74,15 +93,11 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
         case _ =>
           RequestBody.Empty // invalid content type
       }
-      Request(reqMethod, uri, queryString, header, body)
+      Request(reqMethod, uri, queryString, header, cookies, body)
     }
   }
 
   override def from(res: Response, httpReq: HttpRequest): HttpResponse = {
-    httpReq match {
-//      case r: FullHttpRequest => r.release()
-      case _ => // nop
-    }
     val status = HttpResponseStatus.valueOf(res.status.code)
     val content =
       if (res.content.isEmpty) Unpooled.EMPTY_BUFFER
@@ -92,8 +107,8 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
       .tap { httpRes =>
         httpRes
           .headers()
-          .set(CONTENT_TYPE, res.contentType.value)
-          .setInt(CONTENT_LENGTH, httpRes.content.readableBytes)
+          .set(HttpHeaderNames.CONTENT_TYPE, res.contentType.value)
+          .setInt(HttpHeaderNames.CONTENT_LENGTH, httpRes.content.readableBytes)
       }
   }
 }

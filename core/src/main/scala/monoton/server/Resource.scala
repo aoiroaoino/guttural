@@ -2,7 +2,7 @@ package monoton.server
 
 import monoton.http.FormMapping.MappingError
 import monoton.http.RequestBody.JsonFactory
-import monoton.http.{FormMapping, Request, Response, ResponseBuilders}
+import monoton.http.{Cookie, Cookies, FormMapping, Request, Response, ResponseBuilders}
 import monoton.syntax.AllSyntax
 import monoton.util.Read
 
@@ -17,6 +17,13 @@ trait Resource extends ResponseBuilders with AllSyntax {
         req <- Handler.getRequest
         a   <- Handler.someValue(factory.from(req))(factory.onFailure(req))
       } yield a
+
+    object cookies {
+
+      def get(name: String): Handler[Option[Cookie]] = Handler.getRequest.map(_.cookies.get(name))
+
+      def all: Handler[Cookies] = Handler.getRequest.map(_.cookies)
+    }
 
     object queryString {
 

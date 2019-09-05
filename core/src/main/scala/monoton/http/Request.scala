@@ -22,6 +22,8 @@ abstract class Request {
   // * ( header-field CRLF )
   def headerFields: Map[String, String]
 
+  def cookies: Cookies
+
   // message-body
   def body: RequestBody
 //  def bodyAs[A]
@@ -44,9 +46,10 @@ object Request {
       uri: URI,
       query: Map[String, Seq[String]],
       headers: Map[String, String],
+      cookies: Cookies,
       body: RequestBody
   ): Request =
-    DefaultRequest(method, uri.getPath, query, headers, body)
+    DefaultRequest(method, uri.getPath, query, headers, cookies, body)
 }
 
 final case class DefaultRequest(
@@ -54,6 +57,7 @@ final case class DefaultRequest(
     absolutePath: String,
     queryString: Map[String, Seq[String]],
     headerFields: Map[String, String],
+    cookies: Cookies,
     body: RequestBody
 ) extends Request
 

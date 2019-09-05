@@ -6,6 +6,7 @@ import com.example.controllers.auth.AuthenticatedUserRequest
 import monoton.http.codec.PlayJsValue
 import monoton.http.{CirceJson, Form, FormMapping, Response}
 import monoton.server.{Handler, Resource}
+import scala.util.chaining._
 
 class UserResource extends Resource {
   import UserResource._
@@ -30,7 +31,10 @@ class UserResource extends Resource {
   }
 
   def modifyTag(userId: UUID, tagId: Int): Handler[Response] =
-    Handler.pure(Ok(s"userId: $userId, tagId: $tagId"))
+    for {
+      cookies <- request.cookies.all
+      _       = println(cookies.to(Vector).tap(println).mkString("\n"))
+    } yield Ok(s"userId: $userId, tagId: $tagId")
 
   def list: Handler[Response] =
     for {
