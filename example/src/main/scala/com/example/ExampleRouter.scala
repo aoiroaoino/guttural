@@ -9,8 +9,9 @@ class ExampleRouter(
 ) extends RoutingDSL {
 
   // health check
-  POST ~ "/echo" to healthCheckResource.echo
-  GET  ~ "/ping" to healthCheckResource.ping
+  POST ~ "/echo"   to healthCheckResource.echo
+  GET  ~ "/ping"   to healthCheckResource.ping
+  GET  ~ "/cookie" to healthCheckResource.setCookie
 
   // users
   resource(userResource) { user =>

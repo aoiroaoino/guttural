@@ -2,8 +2,15 @@ package monoton.http
 
 import java.nio.charset.StandardCharsets
 
-final case class Response(status: Status, contentType: ContentType, content: Array[Byte]) {
-  def clearContent: Response = copy(content = Array.emptyByteArray)
+final case class Response(
+    status: Status,
+    contentType: ContentType,
+    content: Array[Byte],
+    cookies: Cookies = Cookies.empty
+) {
+  def clearContent: Response                           = copy(content = Array.emptyByteArray)
+  def addCookie(cookie: Cookie): Response              = copy(cookies = cookies.add(cookie))
+  def addCookie(name: String, value: String): Response = copy(cookies = cookies.add(Cookie(name, value)))
 }
 
 object Response {}

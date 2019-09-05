@@ -14,14 +14,13 @@ import io.netty.handler.codec.http.{
   HttpResponseStatus,
   QueryStringDecoder
 }
-import io.netty.handler.codec.http.cookie.ServerCookieDecoder
+import io.netty.handler.codec.http.cookie.{DefaultCookie, ServerCookieDecoder, ServerCookieEncoder, Cookie => NCookie}
 import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType
 import io.netty.handler.codec.http.multipart.{Attribute, HttpPostMultipartRequestDecoder}
 import monoton.http.{QueryStringDecoder => _, _}
 import monoton.util.Flow
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters._
 import scala.util.chaining._
 
@@ -44,9 +43,9 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
     val cookies = httpReq match {
       case fullReq: FullHttpRequest =>
         Option(fullReq.headers.get(HttpHeaderNames.COOKIE)).fold(Cookies.empty) { cookieStr =>
-          val buf: mutable.ArrayBuffer[Cookie] = ArrayBuffer.empty
+          val buf: mutable.Set[Cookie] = mutable.Set.empty
           ServerCookieDecoder.STRICT.decode(cookieStr).forEach(c => buf.addOne(Cookie(c.name, c.value)))
-          new Cookies(buf.toSeq)
+          new Cookies(buf.toSet)
         }
       case _ =>
         Cookies.empty
@@ -109,6 +108,10 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
           .headers()
           .set(HttpHeaderNames.CONTENT_TYPE, res.contentType.value)
           .setInt(HttpHeaderNames.CONTENT_LENGTH, httpRes.content.readableBytes)
+        if (res.cookies.nonEmpty) {
+          val nCookies = res.cookies.to(Seq).map(c => new DefaultCookie(c.name, c.value))
+          httpRes.headers.set(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.LAX.encode(nCookies: _*))
+        }
       }
   }
 }

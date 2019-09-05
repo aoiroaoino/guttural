@@ -22,7 +22,8 @@ lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-feature",
     "-unchecked",
-    "-deprecation"
+    "-deprecation",
+    "-language:implicitConversions"
   )
 )
 
