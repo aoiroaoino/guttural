@@ -1,6 +1,6 @@
 package monoton.server.netty
 
-import monoton.server.netty.flow.{HttpMessageConvertFlow, RoutingFlow}
+import monoton.server.RoutingFlow
 
 import scala.concurrent.ExecutionContext
 

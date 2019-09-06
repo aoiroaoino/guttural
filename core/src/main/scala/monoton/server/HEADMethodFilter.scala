@@ -1,4 +1,4 @@
-package monoton.server.netty.flow
+package monoton.server
 
 import monoton.http.{Method, Request, Response}
 import monoton.util.Filter

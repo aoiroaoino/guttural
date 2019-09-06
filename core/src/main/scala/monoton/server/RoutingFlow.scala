@@ -1,7 +1,6 @@
-package monoton.server.netty.flow
+package monoton.server
 
 import monoton.http.{Request, Response, ResponseBuilders}
-import monoton.server.{HandleRequest, Router}
 import monoton.util.Flow
 
 class RoutingFlow(router: Router) extends Flow[Request, Response, HandleRequest, Response] {

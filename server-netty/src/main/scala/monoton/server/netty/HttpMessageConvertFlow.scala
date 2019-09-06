@@ -1,22 +1,13 @@
 package monoton.server.netty
-package flow
 
 import java.net.URI
 import java.util
 
 import io.netty.buffer.Unpooled
-import io.netty.handler.codec.http.{
-  DefaultFullHttpResponse,
-  FullHttpRequest,
-  HttpHeaderNames,
-  HttpRequest,
-  HttpResponse,
-  HttpResponseStatus,
-  QueryStringDecoder
-}
-import io.netty.handler.codec.http.cookie.{DefaultCookie, ServerCookieDecoder, ServerCookieEncoder, Cookie => NCookie}
+import io.netty.handler.codec.http.cookie.{DefaultCookie, ServerCookieDecoder, ServerCookieEncoder}
 import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType
 import io.netty.handler.codec.http.multipart.{Attribute, HttpPostMultipartRequestDecoder}
+import io.netty.handler.codec.http.{Cookie => _, _}
 import monoton.http.{QueryStringDecoder => _, _}
 import monoton.util.Flow
 

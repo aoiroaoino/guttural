@@ -3,7 +3,7 @@ package monoton.server.netty
 import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.handler.codec.http._
 import io.netty.util.ReferenceCountUtil
-import monoton.server.netty.flow.{HEADMethodFilter, HttpMessageConvertFlow, RoutingFlow}
+import monoton.server.{HEADMethodFilter, RoutingFlow}
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}

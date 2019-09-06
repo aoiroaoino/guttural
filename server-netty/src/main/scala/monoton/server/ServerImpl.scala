@@ -1,8 +1,7 @@
 package monoton.server
 
 import javax.inject.Inject
-import monoton.server.netty.flow.{HttpMessageConvertFlow, RoutingFlow}
-import monoton.server.netty.{HttpServerHandlerProvider, HttpServerInitializer, NettyServer}
+import monoton.server.netty.{HttpMessageConvertFlow, HttpServerHandlerProvider, HttpServerInitializer, NettyServer}
 
 import scala.concurrent.ExecutionContext
 
