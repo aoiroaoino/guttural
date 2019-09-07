@@ -1,62 +1,46 @@
 package com.example.controllers
 
-import java.util.UUID
-
-import com.example.controllers.auth.AuthenticatedUserRequest
-import monoton.http.codec.PlayJsValue
-import monoton.http.{CirceJson, Form, FormMapping, Response}
+import com.example.model.{User, UserDataAccessor, UserId}
+import monoton.http.{CirceJson, Form, Response}
 import monoton.server.{Handler, Resource}
 import scala.util.chaining._
 
 class UserResource extends Resource {
-  import UserResource._
   import monoton.http.codec.circe._
-  import monoton.http.codec.playjson._
+  import UserResource._
 
-  def create: Handler[Response] =
+  def list: RequestHandler =
     for {
-      userId <- request.to(AuthenticatedUserRequest).map(_.userId)
-      json   <- request.body.as(PlayJsValue)
-      _      = println(json)
-    } yield Ok(json)
+      users <- Handler.pure(UserDataAccessor.findAll())
+      res   = users.mkString("\n")
+    } yield Ok(res)
 
-  def update(userId: UUID): Handler[Response] = {
-    import io.circe.syntax._
-    import io.circe.generic.auto._
+  def create: RequestHandler =
     for {
-      dto <- request.body.as(form, errors => {
-        BadRequest(UpdateResponseJson(success = false, errors.map(_.msg)).asJson)
-      })
-    } yield Ok(UpdateResponseJson(success = true, dto).asJson)
-  }
+      form <- request.body.as(createUserForm, errors => BadRequest(errors.mkString("\n")))
+      user = User.create(form.name, form.age)
+      _    <- UserDataAccessor.upsert(user).valueOr(_ => InternalServerError("unexpected error"))
+    } yield Ok(user.id.value.toString)
 
-  def modifyTag(userId: UUID, tagId: Int): Handler[Response] =
-    for {
-      cookies <- request.cookies.all
-      _       = println(cookies.to(Vector).tap(println).mkString("\n"))
-    } yield Ok(s"userId: $userId, tagId: $tagId")
+  def delete(userId: UserId): RequestHandler =
+    UserDataAccessor
+      .delete(userId)
+      .valueOrNotFound(_ => s"$userId is not found")
+      .map(_ => Ok(s"delete $userId"))
 
-  def list: Handler[Response] =
-    for {
-      _ <- Handler.pure(println("start get users"))
-      _ <- request.queryString.getOption[Int]("number").map { i =>
-        println(s"query string number: $i")
-        i
-      }
-      _ <- Handler.WIP // ここで打ち切ることができる
-      name <- Handler.later[String] {
-        println("read user from database")
-        throw new Exception("no connection")
-      }
-    } yield Ok(name)
+  def update(userId: UserId): RequestHandler =
+    request.body.as(CirceJson).map(Ok(_))
+
+  def modifyTag =
+    (userId: UserId, tagId: Int) =>
+      for {
+        cookies <- request.cookies.all
+        _       = println(cookies.to(Vector).tap(println).mkString("\n"))
+      } yield Ok(s"userId: $userId, tagId: $tagId")
 }
 
 object UserResource {
 
-  final case class UserForm(id: UUID, name: String, age: Int)
-
-  val form: FormMapping[UserForm] =
-    Form.mapping("id", "name", "age")(UserForm.apply)
-
-  final case class UpdateResponseJson[A](success: Boolean, content: A)
+  final case class CreateUserForm(name: String, age: Int)
+  val createUserForm = Form.mapping("name", "age")(CreateUserForm.apply)
 }

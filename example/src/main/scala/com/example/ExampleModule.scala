@@ -3,7 +3,7 @@ package com.example
 import java.util.concurrent.Executors
 
 import com.example.controllers.{HealthCheckResource, UserResource}
-import monoton.server.{Server, ServerImpl}
+import monoton.server.{Server, ServerImpl, ServerImplByAkkaHttp}
 
 import scala.concurrent.ExecutionContext
 
@@ -21,5 +21,7 @@ class ExampleModule {
     ExecutionContext.fromExecutor(es)
   }
 
-  val server: Server = new ServerImpl(serverPort, router, requestExecutor)
+  val server: Server =
+//    new ServerImpl(serverPort, router, requestExecutor)
+    new ServerImplByAkkaHttp(serverPort, router)
 }

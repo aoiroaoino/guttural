@@ -65,7 +65,8 @@ lazy val serverAkkaHttp = (project in file("server-akka-http"))
   .settings(moduleName := "monoton-server-akka-http")
   .settings(commonSettings)
   .settings(libraryDependencies ++= Seq(
-    "com.typesafe.akka" %% "akka-http-core" % v.akkaHttp,
+    "com.typesafe.akka" %% "akka-http"   % "10.1.9",
+    "com.typesafe.akka" %% "akka-stream" % "2.5.23",
     "org.slf4j" % "slf4j-api" % v.slf4jApi
   ))
   .dependsOn(core)
@@ -92,4 +93,4 @@ lazy val example = project
   .settings(moduleName := "monoton-example")
   .settings(commonSettings)
   .settings(libraryDependencies += "io.circe" %% "circe-generic" % v.circe)
-  .dependsOn(core, serverNetty, adapterCirce, adapterCodecPlayJson)
+  .dependsOn(core, serverNetty, serverAkkaHttp, adapterCirce, adapterCodecPlayJson)
