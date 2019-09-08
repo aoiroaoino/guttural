@@ -1,3 +1,5 @@
+import microsites._
+
 inThisBuild(Seq(
   organization := "dev.aoiroaoino",
   name := "monoton",
@@ -87,6 +89,38 @@ lazy val adapterCodecPlayJson = (project in file("adapter-codec-play-json"))
     "com.typesafe.play" %% "play-json" % "2.8.0-M5"
   ))
   .dependsOn(core)
+
+lazy val docs = project
+  .settings(moduleName := "monoton-docs")
+  .settings(Seq(
+    micrositeName := "Monoton",
+    micrositeDescription := "Simple and Monotonous Web Framework for Scala",
+//    micrositeUrl := "https://github.com/aoiroaoino/monoton",
+    micrositeDocumentationUrl := "/docs",
+    micrositeAuthor := "aoiroaoino",
+    micrositeHomepage := "https://github.com/aoiroaoino/monoton",
+    // Twitter
+    micrositeTwitter := "@aoiroaoino",
+    micrositeTwitterCreator := "@aoiroaoino",
+    // GitHub
+    micrositeGithubOwner := "aoiroaoino",
+    micrositeGithubRepo := "monoton",
+    // other
+    micrositeHighlightTheme := "atom-one-light",
+    micrositeExtraMdFiles := Map(
+      file("README.md") -> ExtraMdFileConfig(
+        "index.md",
+        "home",
+        Map("title" -> "Home", "section" -> "home", "position" -> "0")
+      ),
+      file("LICENSE") -> ExtraMdFileConfig(
+        "license.md",
+        "home",
+        Map("title" -> "License", "section" -> "license", "position" -> "7")
+      ),
+    )
+  ))
+  .enablePlugins(MicrositesPlugin)
 
 // TODO: move to other repository
 lazy val example = project

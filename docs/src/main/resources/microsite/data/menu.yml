@@ -1,0 +1,29 @@
+options:
+  - title: Getting Started
+    url: docs/getting_started.html
+
+  - title: Tutorial
+    url: docs/tutorial.html
+    section: tutorial
+
+  - title: User's Guide
+    url: docs/guide/index.html
+
+    nested_options:
+      - title: Router
+        url: docs/guide/router.html
+
+      - title: Controller
+        url: docs/guide/controller.html
+
+      - title: Handler
+        url: docs/guide/handler.html
+
+  - title: Advanced Tips
+    url: docs/advanced_tips.html
+
+  - title: Release Notes
+    url: docs/release_notes.html
+
+  - title: FAQ
+    url: docs/faq.html
