@@ -1,27 +1,30 @@
-package monoton.server.akka_http.flow
+package monoton.server.akka_http
 
 import java.nio.charset.StandardCharsets
 
-import akka.http.scaladsl.model.{ContentType, ContentTypes, HttpEntity, HttpRequest, HttpResponse}
-import monoton.http.{Cookie, Cookies, DefaultRequest, Method, Request, RequestBody, Response}
+import akka.http.scaladsl.model._
+import akka.stream.Materializer
+import monoton.http.{ContentType => _, _}
 import monoton.util.Flow
 
-class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Response] {
+class HttpMessageConvertFlow(implicit mat: Materializer) extends Flow[HttpRequest, HttpResponse, Request, Response] {
 
   override def to(s: HttpRequest): Either[HttpResponse, Request] = {
     val body = s.entity match {
-      case e: HttpEntity.Strict =>
-        e.contentType match {
+      case entity: HttpEntity.Strict =>
+        entity.contentType match {
           case ContentTypes.`text/plain(UTF-8)` =>
-            RequestBody.DefaultTextPlain(e.data.toByteBuffer.array, Some(StandardCharsets.UTF_8))
+            RequestBody.DefaultTextPlain(entity.data.toByteBuffer.array, Some(StandardCharsets.UTF_8))
           case ContentTypes.`application/json` =>
-            RequestBody.DefaultApplicationJson(e.data.toByteBuffer.array)
+            RequestBody.DefaultApplicationJson(entity.data.toByteBuffer.array)
           case other =>
             println("ContentType: " + other)
-            RequestBody.DefaultApplicationOctetStream(e.data.toByteBuffer.array)
+            RequestBody.DefaultApplicationOctetStream(entity.data.toByteBuffer.array)
         }
+      case entity: HttpEntity.Default =>
       case other =>
         println("unsupported yet. HttpEntity: " + other)
+        other.discardBytes()
         RequestBody.Empty
     }
     Right(

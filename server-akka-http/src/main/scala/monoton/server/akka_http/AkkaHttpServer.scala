@@ -5,16 +5,16 @@ import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import monoton.server.{HEADMethodFilter, RoutingFlow}
-import monoton.server.akka_http.flow.HttpMessageConvertFlow
 
 class AkkaHttpServer(
     port: Int,
-    convertFlow: HttpMessageConvertFlow,
     routingFlow: RoutingFlow
 ) {
   implicit val system = ActorSystem()
   implicit val mat    = ActorMaterializer()
   implicit val ec     = system.dispatcher
+
+  val convertFlow = new HttpMessageConvertFlow
 
   val flow = convertFlow |> HEADMethodFilter |> routingFlow
 
