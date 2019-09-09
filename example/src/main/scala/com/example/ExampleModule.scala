@@ -22,6 +22,6 @@ class ExampleModule {
   }
 
   val server: Server =
-//    new ServerImpl(serverPort, router, requestExecutor)
-    new ServerImplByAkkaHttp(serverPort, router)
+    new ServerImpl(serverPort, router, requestExecutor)
+//    new ServerImplByAkkaHttp(serverPort, router)
 }

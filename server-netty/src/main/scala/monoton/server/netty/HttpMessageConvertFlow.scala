@@ -6,7 +6,7 @@ import java.util
 import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http.cookie.{DefaultCookie, ServerCookieDecoder, ServerCookieEncoder}
 import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType
-import io.netty.handler.codec.http.multipart.{Attribute, HttpPostMultipartRequestDecoder}
+import io.netty.handler.codec.http.multipart.{Attribute, HttpPostMultipartRequestDecoder, HttpPostRequestDecoder}
 import io.netty.handler.codec.http.{Cookie => _, _}
 import monoton.http.{QueryStringDecoder => _, _}
 import monoton.util.Flow
@@ -66,6 +66,13 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
           RequestBody.DefaultApplicationJson(readRawBody())
         case ContentType.`text/plain` =>
           RequestBody.DefaultTextPlain(readRawBody(), None)
+        case ContentType.`application/x-www-form-urlencoded` =>
+          val decoder = new HttpPostRequestDecoder(httpReq)
+          val data = decoder.getBodyHttpDatas.asScala.collect {
+            case d if d.getHttpDataType == HttpDataType.Attribute =>
+              (d.getName, d.asInstanceOf[Attribute].getValue)
+          }.toMap
+          RequestBody.DefaultApplicationXWWWFormUrlencoded(data).tap(_ => decoder.destroy()).tap(println)
         case ContentType.`multipart/form-data` =>
           val decoder = new HttpPostMultipartRequestDecoder(httpReq)
           val data = Iterator
@@ -77,7 +84,7 @@ class HttpMessageConvertFlow extends Flow[HttpRequest, HttpResponse, Request, Re
             }
             .collect { case (name, HttpDataType.Attribute, d) => (name, d.asInstanceOf[Attribute].getValue) }
             .toMap
-          RequestBody.DefaultMultipartFormData(data).tap(_ => decoder.destroy()).tap(println)
+          RequestBody.DefaultMultipartFormData(data).tap(_ => decoder.destroy())
         case ContentType.`application/octet-stream` =>
           RequestBody.DefaultApplicationOctetStream(readRawBody())
         case _ =>

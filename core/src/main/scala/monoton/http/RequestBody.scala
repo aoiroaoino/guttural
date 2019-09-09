@@ -13,6 +13,7 @@ abstract class RequestBody extends Serializable {
 
   def asJson: RequestBody.AsJson
 
+  def asXWWWFormUrlencoded: RequestBody.AsForm
   def asMultipartFormData: RequestBody.AsForm
 }
 
@@ -23,7 +24,8 @@ object RequestBody {
   // text/plain
 
   abstract class TextPlain extends RequestBody {
-    override def asMultipartFormData: AsForm = AsForm.NotConvertible
+    override def asMultipartFormData: AsForm  = AsForm.NotConvertible
+    override def asXWWWFormUrlencoded: AsForm = AsForm.NotConvertible
   }
 
   final case class DefaultTextPlain(bytes: Array[Byte], charset: Option[Charset]) extends TextPlain {
@@ -34,20 +36,22 @@ object RequestBody {
 
   // application/x-www-form-urlencoded
 
-//  abstract class ApplicationXWWWFormUrlencoded extends RequestBody {
-//    override def asBytes: Array[Byte]             = Array.emptyByteArray
-//    override def asText(charset: Charset): String = ""
-//    override def asJson: AsJson                   = AsJson.NotConvertible
-//  }
-//
-//  final case class DefaultApplicationXWWWFormUrlencoded(m: Map[String, String]) extends ApplicationXWWWFormUrlencoded {
-//    override def asMultipartFormData: AsForm = AsForm.Just(m)
-//  }
+  abstract class ApplicationXWWWFormUrlencoded extends RequestBody {
+    override def asBytes: Array[Byte]             = Array.emptyByteArray
+    override def asText(charset: Charset): String = ""
+    override def asJson: AsJson                   = AsJson.NotConvertible
+  }
+
+  final case class DefaultApplicationXWWWFormUrlencoded(m: Map[String, String]) extends ApplicationXWWWFormUrlencoded {
+    override def asMultipartFormData: AsForm  = AsForm.Just(m) // 厳密にすべきか悩む
+    override def asXWWWFormUrlencoded: AsForm = AsForm.Just(m)
+  }
 
   // application/json
 
   abstract class ApplicationJson extends RequestBody {
-    override def asMultipartFormData: AsForm = AsForm.NotConvertible
+    override def asXWWWFormUrlencoded: AsForm = AsForm.NotConvertible
+    override def asMultipartFormData: AsForm  = AsForm.NotConvertible
   }
 
   final case class DefaultApplicationJson(bytes: Array[Byte]) extends ApplicationJson {
@@ -57,7 +61,8 @@ object RequestBody {
   }
 
   abstract class ApplicationOctetStream extends RequestBody {
-    override def asMultipartFormData: AsForm = AsForm.NotConvertible
+    override def asXWWWFormUrlencoded: AsForm = AsForm.NotConvertible
+    override def asMultipartFormData: AsForm  = AsForm.NotConvertible
   }
   final case class DefaultApplicationOctetStream(bytes: Array[Byte]) extends ApplicationOctetStream {
     override def asBytes: Array[Byte]             = bytes
@@ -74,7 +79,8 @@ object RequestBody {
   }
   final case class DefaultMultipartFormData(atters: Map[String, String] /* , files: Seq[Path] */ )
       extends MultipartFormData {
-    override def asMultipartFormData: AsForm = AsForm.Just(atters)
+    override def asXWWWFormUrlencoded: AsForm = AsForm.Just(atters) // 厳密にすべきか悩む
+    override def asMultipartFormData: AsForm  = AsForm.Just(atters)
   }
 
   // JSON Converter
@@ -120,6 +126,7 @@ object RequestBody {
     override def asBytes: Array[Byte]             = Array.emptyByteArray
     override def asText(charset: Charset): String = ""
     override def asJson: AsJson                   = AsJson.NotConvertible
+    override def asXWWWFormUrlencoded: AsForm     = AsForm.NotConvertible
     override def asMultipartFormData: AsForm      = AsForm.NotConvertible
   }
 }

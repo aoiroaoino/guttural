@@ -1,5 +1,7 @@
 package monoton.server
 
+import java.nio.charset.{Charset, StandardCharsets}
+
 import monoton.http.FormMapping.MappingError
 import monoton.http.RequestBody.JsonFactory
 import monoton.http.{Cookie, Cookies, FormMapping, Request, Response, ResponseBuilders}
@@ -53,7 +55,12 @@ trait Controller extends ResponseBuilders with AllSyntax {
 
     object body {
 
-      // form
+      def asBytes: Handler[Array[Byte]] = Handler.getRequest.map(_.body.asBytes)
+
+      def asText(charset: Charset = StandardCharsets.UTF_8): Handler[String] =
+        Handler.getRequest.map(_.body.asText(charset))
+
+      // application/x-www-form-urlencoded and multipart/form-data
 
       def as[A](mapping: FormMapping[A], ifError: List[MappingError] => Response): Handler[A] =
         Handler.getRequest
@@ -61,7 +68,11 @@ trait Controller extends ResponseBuilders with AllSyntax {
 
       def as[A](mapping: FormMapping[A]): Handler[A] = as(mapping, _ => BadRequest)
 
-      // json
+      // multipart/form-data
+
+      object files {}
+
+      // application/json
 
       def as[A](factory: JsonFactory[A], ifError: => Response): Handler[A] =
         Handler.getRequest.flatMap(req => Handler.someValue(req.body.asJson.to(factory))(ifError))

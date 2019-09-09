@@ -3,7 +3,7 @@ package com.example.controllers
 import com.example.model.{User, UserDataAccessor, UserId}
 import monoton.http.codec.CirceJson
 import monoton.http.Form
-import monoton.server.{Handler, Controller}
+import monoton.server.{Controller, Handler}
 
 import scala.util.chaining._
 
@@ -31,7 +31,8 @@ class UserController extends Controller {
       .map(_ => Ok(s"delete $userId"))
 
   def update(userId: UserId): RequestHandler =
-    request.body.as(CirceJson).map(Ok(_))
+    request.body.as(updateUserForm).map(_.toString).map(Ok(_))
+//    request.body.as(CirceJson).map(Ok(_))
 
   def modifyTag =
     (userId: UserId, tagId: Int) =>
@@ -45,4 +46,7 @@ object UserController {
 
   final case class CreateUserForm(name: String, age: Int)
   val createUserForm = Form.mapping("name", "age")(CreateUserForm.apply)
+
+  final case class UpdateUserForm(name: String, age: Int)
+  val updateUserForm = Form.mapping("name", "age")(UpdateUserForm.apply)
 }
