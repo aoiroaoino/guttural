@@ -2,15 +2,15 @@ package com.example
 
 import java.util.concurrent.Executors
 
-import com.example.controllers.{HealthCheckResource, UserResource}
+import com.example.controllers.{HealthCheckController, UserController}
 import monoton.server.{Server, ServerImpl, ServerImplByAkkaHttp}
 
 import scala.concurrent.ExecutionContext
 
 class ExampleModule {
 
-  private val healthCheckController = new HealthCheckResource
-  private val userController        = new UserResource
+  private val healthCheckController = new HealthCheckController
+  private val userController        = new UserController
 
   private val router = new ExampleRouter(healthCheckController, userController)
 

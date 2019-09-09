@@ -2,14 +2,14 @@ package com.example
 
 import java.util.UUID
 
-import com.example.controllers.{HealthCheckResource, UserResource}
+import com.example.controllers.{HealthCheckController, UserController}
 import com.example.model.UserId
 import monoton.server.{Handler, RoutingDSL}
 import monoton.util.Read
 
 class ExampleRouter(
-    healthCheckResource: HealthCheckResource,
-    userResource: UserResource
+    healthCheckResource: HealthCheckController,
+    userResource: UserController
 ) extends RoutingDSL {
 
   implicit def userIdRead(implicit M: Read[UUID]): Read[UserId] = M.map(UserId.apply)

@@ -6,7 +6,7 @@ import monoton.http.{Cookie, Cookies, FormMapping, Request, Response, ResponseBu
 import monoton.syntax.AllSyntax
 import monoton.util.Read
 
-trait Resource extends ResponseBuilders with AllSyntax {
+trait Controller extends ResponseBuilders with AllSyntax {
 
   type RequestHandler = Handler[Response]
 

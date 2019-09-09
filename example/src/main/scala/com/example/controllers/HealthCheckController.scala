@@ -4,9 +4,9 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 import monoton.http.{Cookie, Response}
-import monoton.server.{Handler, Resource}
+import monoton.server.{Handler, Controller}
 
-class HealthCheckResource extends Resource {
+class HealthCheckController extends Controller {
 
   def ping: Handler[Response] = Ok("pong")
 

@@ -3,13 +3,13 @@ package com.example.controllers
 import com.example.model.{User, UserDataAccessor, UserId}
 import monoton.http.codec.CirceJson
 import monoton.http.Form
-import monoton.server.{Handler, Resource}
+import monoton.server.{Handler, Controller}
 
 import scala.util.chaining._
 
-class UserResource extends Resource {
+class UserController extends Controller {
   import monoton.http.codec.circe._
-  import UserResource._
+  import UserController._
 
   def list: RequestHandler =
     for {
@@ -41,7 +41,7 @@ class UserResource extends Resource {
       } yield Ok(s"userId: $userId, tagId: $tagId")
 }
 
-object UserResource {
+object UserController {
 
   final case class CreateUserForm(name: String, age: Int)
   val createUserForm = Form.mapping("name", "age")(CreateUserForm.apply)
