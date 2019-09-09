@@ -9,7 +9,7 @@ class RoutingFlow(router: Router) extends Flow[Request, Response, HandleRequest,
     router
       .findRouting(req.method, req.absolutePath)
       .map(routing => new HandleRequest(req, routing.getHandler(req.absolutePath)))
-      .toRight(ResponseBuilders.NotFound())
+      .toRight(ResponseBuilders.NotFound)
 
   override def from(b: Response, s: Request): Response = b
 }

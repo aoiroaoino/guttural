@@ -37,7 +37,7 @@ trait Resource extends ResponseBuilders with AllSyntax {
             vs <- req.queryString.get(key)
             v  <- vs.headOption
             r  <- M.readOption(v)
-          } yield r)(BadRequest())
+          } yield r)(BadRequest)
         } yield a
 
       def getOption[A](key: String)(implicit M: Read[A]): Handler[Option[A]] =
@@ -59,14 +59,14 @@ trait Resource extends ResponseBuilders with AllSyntax {
         Handler.getRequest
           .flatMap(req => Handler.rightValue(req.body.asMultipartFormData.attributes.to(mapping))(ifError))
 
-      def as[A](mapping: FormMapping[A]): Handler[A] = as(mapping, _ => BadRequest())
+      def as[A](mapping: FormMapping[A]): Handler[A] = as(mapping, _ => BadRequest)
 
       // json
 
       def as[A](factory: JsonFactory[A], ifError: => Response): Handler[A] =
         Handler.getRequest.flatMap(req => Handler.someValue(req.body.asJson.to(factory))(ifError))
 
-      def as[A](factory: JsonFactory[A]): Handler[A] = as(factory, BadRequest())
+      def as[A](factory: JsonFactory[A]): Handler[A] = as(factory, BadRequest)
     }
   }
 }

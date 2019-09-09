@@ -21,7 +21,6 @@ class HttpMessageConvertFlow(implicit mat: Materializer) extends Flow[HttpReques
             println("ContentType: " + other)
             RequestBody.DefaultApplicationOctetStream(entity.data.toByteBuffer.array)
         }
-      case entity: HttpEntity.Default =>
       case other =>
         println("unsupported yet. HttpEntity: " + other)
         other.discardBytes()

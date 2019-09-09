@@ -13,7 +13,13 @@ final case class Response(
   def addCookie(name: String, value: String): Response = copy(cookies = cookies.add(Cookie(name, value)))
 }
 
-object Response {}
+object Response {
+
+  def emptyContent(status: Status): Response = {
+    val encoder = ContentEncoder.unitEncoder
+    Response(status, encoder.defaultContentType, encoder.encode(()), Cookies.empty)
+  }
+}
 
 trait ContentEncoder[A] {
   def defaultContentType: ContentType

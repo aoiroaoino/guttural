@@ -1,8 +1,10 @@
 package com.example.controllers
 
 import com.example.model.{User, UserDataAccessor, UserId}
-import monoton.http.{CirceJson, Form, Response}
+import monoton.http.codec.CirceJson
+import monoton.http.Form
 import monoton.server.{Handler, Resource}
+
 import scala.util.chaining._
 
 class UserResource extends Resource {

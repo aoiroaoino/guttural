@@ -10,6 +10,6 @@ class HandleRequest(request: Request, handler: Handler[Response]) {
     handler.run(request).recover {
       case e: Throwable =>
         e.printStackTrace() // TODO: use logger
-        ResponseBuilders.InternalServerError() // Handler の予期せぬ例外は全て InternalServerError に。
+        ResponseBuilders.InternalServerError // Handler の予期せぬ例外は全て InternalServerError に。
     }
 }
