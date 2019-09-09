@@ -1,6 +1,12 @@
-# monoton
+# Monoton
 
 Web Framework for Scala.
+
+## What's Monoton?
+
+- Simple 
+- Functional
+- 
 
 ## Quick Start
 
