@@ -38,8 +38,8 @@ lazy val guiceSettings = Seq(
 
 lazy val root = (project in file("."))
   .settings(commonSettings)
-  .aggregate(core, serverNetty, serverAkkaHttp, adapterCirce, adapterCodecPlayJson)
-  .dependsOn(core, serverNetty, serverAkkaHttp, adapterCirce, adapterCodecPlayJson)
+  .aggregate(core, serverNetty, serverAkkaHttp, codecCirce, codecPlayJson)
+  .dependsOn(core, serverNetty, serverAkkaHttp, codecCirce, codecPlayJson)
 
 lazy val core = project
   .settings(moduleName := "monoton-core")
@@ -73,8 +73,8 @@ lazy val serverAkkaHttp = (project in file("server-akka-http"))
   ))
   .dependsOn(core)
 
-lazy val adapterCirce = (project in file("adapter-circe"))
-  .settings(moduleName := "monoton-adapter-circe")
+lazy val codecCirce = (project in file("codec-circe"))
+  .settings(moduleName := "monoton-codec-circe")
   .settings(commonSettings)
   .settings(libraryDependencies ++= Seq(
     "io.circe" %% "circe-core" % v.circe,
@@ -82,8 +82,8 @@ lazy val adapterCirce = (project in file("adapter-circe"))
   ))
   .dependsOn(core)
 
-lazy val adapterCodecPlayJson = (project in file("adapter-codec-play-json"))
-  .settings(moduleName := "monoton-adapter-codec-play-json")
+lazy val codecPlayJson = (project in file("codec-play-json"))
+  .settings(moduleName := "monoton-codec-play-json")
   .settings(commonSettings)
   .settings(libraryDependencies ++= Seq(
     "com.typesafe.play" %% "play-json" % "2.8.0-M5"
@@ -127,4 +127,4 @@ lazy val example = project
   .settings(moduleName := "monoton-example")
   .settings(commonSettings)
   .settings(libraryDependencies += "io.circe" %% "circe-generic" % v.circe)
-  .dependsOn(core, serverNetty, serverAkkaHttp, adapterCirce, adapterCodecPlayJson)
+  .dependsOn(core, serverNetty, serverAkkaHttp, codecCirce, codecPlayJson)
