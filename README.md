@@ -11,7 +11,7 @@ Monoton は Netty と Akka HTTP をベースにした関数型の Web Framework 
 きっと使い始めてすぐにそのコンセプトに納得するはずです。それではさっそく始めましょう！
 
 
-## Getting Started
+## Quick Start
 
 SBT を使うのであればセットアップはとても簡単です。`plugins.sbt` ファイルに以下の一行を追加し、
 `build.sbt` ファイルで対象のプロジェクトで `MonotonPlugin` を有効化するだけです。
