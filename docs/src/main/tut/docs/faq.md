@@ -6,4 +6,6 @@ position: 6
 
 # FAQ
 
-To be continued...
+## Q: これはなんですか？
+
+夏休み利用して作った Web Framework の PoC でした。

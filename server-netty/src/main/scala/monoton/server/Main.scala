@@ -4,7 +4,13 @@ import com.google.inject.{AbstractModule, Guice}
 
 object Main {
 
-  val appModule = Class.forName("AppModule").newInstance().asInstanceOf[AbstractModule]
+  val appModule = try {
+    Class.forName("AppModule").newInstance().asInstanceOf[AbstractModule]
+  } catch {
+    case e: Throwable =>
+      println(e.getMessage)
+      Class.forName("monoton.server.DefaultModule").newInstance().asInstanceOf[AbstractModule]
+  }
 
   val injector = Guice.createInjector(new NettyModule, appModule)
   val server   = injector.getInstance(classOf[Server])

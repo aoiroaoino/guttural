@@ -1,68 +1,51 @@
 # Monoton
 
-Web Framework for Scala.
+単調で退屈な Scala 向けの Web Framework.
 
 ## What's Monoton?
 
-- Simple 
-- Functional
-- 
+Monoton は Netty と Akka HTTP をベースにした関数型の Web Framework です。
+多くの部分で Play Framework に影響を受けており、これに慣れている開発者であればすぐに使いこなすことができるでしょう。
+もちろん、Play Framework を使ったことなくても大丈夫。ありとあらゆる処理をシンプルな Handler という概念を合成することで、
+実現することができます。Monoton という名前の由来は「monotone: 単調な、単純で退屈な」。
+きっと使い始めてすぐにそのコンセプトに納得するはずです。それではさっそく始めましょう！
 
-## Quick Start
+
+## Getting Started
+
+SBT を使うのであればセットアップはとても簡単です。`plugins.sbt` ファイルに以下の一行を追加し、
+`build.sbt` ファイルで対象のプロジェクトで `MonotonPlugin` を有効化するだけです。
 
 ### build settings
 
-```sbt
+`project/plugins.sbt`
+
+```scala
 addSbtPlugin("dev.aoiroaoino" % "monoton-plugin" % "0.1.0-SNAPSHOT")
 ```
-and
-```sbt
-lazy val httpServer = project
-  .settings( /* your settings */ )
+
+`build.sbt`
+
+```scala
+lazy val root = (project in file("."))
   .enablePlugins(MonotonPlugin)
 ```
 
-### Define Resources
+なんと、たったこれだけで REST API サーバーが起動します！
+試してみましょう。
 
-```scala
-import monoton.http.Response
-import monoton.server.{Handler, Resource}
-// Write other imports
-
-class StatusResource extends Resource {
-
-  def ping: Handler[Response] = Handler.pure(Ok("pong"))
-}
+```bash
+$ sbt run
 ```
 
-### Define Router
+```bash
+$ curl -i http://localhost:8080
+HTTP/1.1 200 OK
+content-type: text/html
+content-length: 24
+connection: close
 
-```scala
-import javax.inject.Inject
-import monoton.server.RoutingDSL
-import monoton.util.Read
-// Write other imports
-
-class MyRouter @Inject()(statusResource: StatusResource) extends RoutingDSL {
-
-  GET ~ "/ping" to statusResource.ping
-}
+<h1>Hello, Monoton!</h1>
 ```
 
-### Define AppModule
-
-```scala
-import scala.concurrent.ExecutionContext
-import com.google.inject.AbstractModule
-import monoton.server.Router
-// Write other imports
-
-class AppModule extends AbstractModule {
-
-  override def configure(): Unit = {
-    bind(classOf[Int]).toInstance(8080) // port
-    bind(classOf[ExecutionContext]).toInstance(ExecutionContext.global)
-    bind(classOf[Router]).to(classOf[MyRouter])
-  }
-}
-```
+とても簡単ですね？さぁ、より深く知るためにもドキュメントを読み進めましょう。
