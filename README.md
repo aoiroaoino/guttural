@@ -8,7 +8,7 @@ Status: PoC
 
 ### framework
 
-```bash
+```sbtshell
 $ sbt root/publishLocal
 $ sbt plugin/publishLocal
 ```
@@ -28,7 +28,7 @@ lazy val root = (project in file("."))
 
 ### docs
 
-```bash
+```sbtshell
 $ sbt docs/makeMicrosite
 ```
 
@@ -59,7 +59,7 @@ connection: close
 
 `[root]/example/controllers/StatusController.scala`:
 
-```bash
+```scala
 package example.controllers
 
 import monoton.http.Response
@@ -116,6 +116,3 @@ pong
 ### Other Example
 
 see: https://github.com/aoiroaoino/monoton-example
-
-
-
