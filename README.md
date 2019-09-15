@@ -66,7 +66,7 @@ import monoton.http.Response
 import monoton.server.{Controller, Handler}
 
 class StatusController extends Controller {
-  def ping: Handler[Response] = Handler.pure(Ok("pong"))
+  def ping: RequestHandler = Handler.pure(Ok("pong"))
 }
 ```
 
