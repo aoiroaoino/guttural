@@ -109,11 +109,6 @@ lazy val docs = project
     // other
     micrositeHighlightTheme := "atom-one-light",
     micrositeExtraMdFiles := Map(
-      file("README.md") -> ExtraMdFileConfig(
-        "index.md",
-        "home",
-        Map("title" -> "Home", "section" -> "home", "position" -> "0")
-      ),
       file("LICENSE") -> ExtraMdFileConfig(
         "license.md",
         "home",
