@@ -27,6 +27,13 @@ object RequestBody {
     override def asMultipartFormData: AsForm  = AsForm.NotConvertible
     override def asXWWWFormUrlencoded: AsForm = AsForm.NotConvertible
   }
+  object TextPlain {
+    def fromString(s: String): TextPlain = new TextPlain {
+      override def asBytes: Array[Byte]             = s.getBytes(DefaultCharset)
+      override def asText(charset: Charset): String = s
+      override def asJson: AsJson                   = AsJson.Just(asBytes)
+    }
+  }
 
   final case class DefaultTextPlain(bytes: Array[Byte], charset: Option[Charset]) extends TextPlain {
     override def asBytes: Array[Byte]             = bytes

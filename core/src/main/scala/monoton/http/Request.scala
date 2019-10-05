@@ -2,8 +2,6 @@ package monoton.http
 
 import java.net.URI
 
-import monoton.http.Request.RequestTarget
-
 import scala.util.control.NonFatal
 
 abstract class Request {
@@ -30,15 +28,6 @@ abstract class Request {
 }
 
 object Request {
-
-  sealed abstract class RequestTarget extends Product with Serializable
-
-  object RequestTarget {
-    final case class OriginForm(absolutePath: String, query: Map[String, Seq[String]]) extends RequestTarget
-    final case class AbsoluteForm(absoluteURI: URI)                                    extends RequestTarget
-    final case class AuthorityForm(authority: String)                                  extends RequestTarget
-    case object AsteriskForm                                                           extends RequestTarget
-  }
 
   // factory
   def apply(

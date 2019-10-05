@@ -25,7 +25,7 @@ lazy val commonSettings = Seq(
     "-feature",
     "-unchecked",
     "-deprecation",
-    "-language:implicitConversions"
+    "-language:implicitConversions,higherKinds"
   )
 )
 
@@ -71,6 +71,14 @@ lazy val serverAkkaHttp = (project in file("server-akka-http"))
     "com.typesafe.akka" %% "akka-http"   % "10.1.9",
     "com.typesafe.akka" %% "akka-stream" % "2.5.23",
     "org.slf4j" % "slf4j-api" % v.slf4jApi
+  ))
+  .dependsOn(core)
+
+lazy val clientScalajHttp = (project in file("client-scalaj-http"))
+  .settings(moduleName := "monoton-client-scalaj-http")
+  .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq(
+    "org.scalaj" %% "scalaj-http" % "2.4.2"
   ))
   .dependsOn(core)
 

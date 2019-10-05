@@ -98,4 +98,14 @@ object Status {
   private def status(code: Int, reasonPhrase: String): Status = new Status(code, reasonPhrase) {}
 
   private[http] def fromStatusCode(n: Int): Option[Status] = all.find(_.code == n)
+
+  def fromStatusLine(s: String): Option[Status] = {
+    // HTTP/1.1 200 OK
+    s.split(' ') match {
+      case Array(_, code, _) =>
+        try fromStatusCode(code.toInt)
+        catch { case e: NumberFormatException => None }
+      case _ => None
+    }
+  }
 }
