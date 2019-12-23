@@ -13,7 +13,7 @@ lazy val v = new {
   val netty = "4.1.38.Final"
   val akkaHttp = "10.1.9"
   // adapters
-  val circe = "0.12.0-RC4"
+  val circe = "0.12.1"
   // other (common)
   val slf4jApi = "1.7.28"
 }
@@ -132,3 +132,14 @@ lazy val example = project
   .settings(commonSettings)
   .settings(libraryDependencies += "io.circe" %% "circe-generic" % v.circe)
   .dependsOn(core, serverNetty, serverAkkaHttp, codecCirce, codecPlayJson)
+
+lazy val it = project
+  .settings(moduleName := "monoton-it")
+  .settings(commonSettings)
+  .dependsOn(core, serverNetty, clientScalajHttp)
+  // integration test settings
+  .configs(IntegrationTest)
+  .settings(
+    Defaults.itSettings,
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "it,test"
+  )
