@@ -16,6 +16,8 @@ object Method {
 
   case object PATCH extends Method("PATCH")
 
+  def Extended(token: String): Method = ???
+
   private val all = Seq(GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH)
   def fromString(s: String): Option[Method] =
     all.find(_.token == s.toUpperCase) // case-insensitive

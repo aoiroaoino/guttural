@@ -25,9 +25,19 @@ abstract class Request {
   // message-body
   def body: RequestBody
 //  def bodyAs[A]
+
+  def requestLine: Line = ???
 }
 
 object Request {
+
+  final case class Line(
+      method: Method,
+      requestURI: URI,
+      httpVersion: String
+  ) {}
+
+  final case class Header()
 
   // factory
   def apply(

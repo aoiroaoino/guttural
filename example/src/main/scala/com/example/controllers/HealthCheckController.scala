@@ -3,14 +3,15 @@ package com.example.controllers
 import java.time.ZonedDateTime
 import java.util.UUID
 
+import monoton.http.server.HandlerBuilder
 import monoton.http.{Cookie, Response}
-import monoton.server.{Handler, Controller}
+import monoton.server.Controller
 
 class HealthCheckController extends Controller {
 
-  def ping: Handler[Response] = Ok("pong")
+  def ping: HandlerBuilder[Response] = Ok("pong")
 
-  def echo = Handler.getRequest.map(req => Ok(req.body.asText))
+  def echo = HandlerBuilder.getRequest.map(req => Ok(req.body.asText))
 
   val CookieNameUUID = "MONOTON_COOKIE_TEST_UUID"
   val CookieNameTime = "MONOTON_COOKIE_TEST_TIME"

@@ -3,7 +3,7 @@ package com.example.controllers
 import com.example.model.{User, UserDataAccessor, UserId}
 import monoton.http.codec.CirceJson
 import monoton.http.Form
-import monoton.server.{Controller, Handler}
+import monoton.server.Controller
 
 import scala.util.chaining._
 
@@ -13,7 +13,7 @@ class UserController extends Controller {
 
   def list: RequestHandler =
     for {
-      users <- Handler.pure(UserDataAccessor.findAll())
+      users <- HandlerBuilder.pure(UserDataAccessor.findAll())
       res   = users.mkString("\n")
     } yield Ok(res)
 

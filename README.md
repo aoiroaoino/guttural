@@ -63,27 +63,16 @@ connection: close
 package example.controllers
 
 import monoton.http.Response
-import monoton.server.{Controller, Handler}
+import monoton.server.Controller
 
 class StatusController extends Controller {
-  def ping: RequestHandler = Handler.pure(Ok("pong"))
+  def ping: RequestHandler = HandlerBuilder.pure(Ok("pong"))
 }
 ```
 
 `[root]/example/MyRouter.scala`:
 
 ```scala
-package example
-
-import javax.inject.{Inject, Singleton}
-import monoton.server.RoutingDSL
-import example.controllers.StatusController
-
-@Singleton
-class MyRouter @Inject()(status: StatusController) extends RoutingDSL {
-
-  GET ~ "/ping" to status.ping
-}
 ```
 
 `[root]/AppModule.scala`:

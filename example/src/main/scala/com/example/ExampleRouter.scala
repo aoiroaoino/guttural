@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.example.controllers.{HealthCheckController, UserController}
 import com.example.model.UserId
-import monoton.server.{Handler, RoutingDSL}
+import monoton.server.RoutingDSL
 import monoton.util.Read
 
 class ExampleRouter(
@@ -29,6 +29,6 @@ class ExampleRouter(
   }
 
   // other
-  GET  ~ "/long/long/cat/path"   to Handler.TODO
-  POST ~ "/foo/bar/baz/qux/path" to Handler.WIP
+  GET  ~ "/long/long/cat/path"   to HandlerBuilder.TODO
+  POST ~ "/foo/bar/baz/qux/path" to HandlerBuilder.WIP
 }
