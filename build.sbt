@@ -10,7 +10,6 @@ lazy val v = new {
   val scala213 = "2.13.0"
   val scala212 = "2.12.9"
   // servers
-  val netty = "4.1.38.Final"
   val akkaHttp = "10.1.9"
   // adapters
   val circe = "0.12.1"
@@ -39,8 +38,8 @@ lazy val guiceSettings = Seq(
 lazy val root = (project in file("."))
   .settings(moduleName := "monoton")
   .settings(commonSettings)
-  .aggregate(core, serverNetty, serverAkkaHttp, codecCirce, codecPlayJson)
-  .dependsOn(core, serverNetty, serverAkkaHttp, codecCirce, codecPlayJson)
+  .aggregate(core, serverAkkaHttp, codecCirce, codecPlayJson)
+  .dependsOn(core, serverAkkaHttp, codecCirce, codecPlayJson)
 
 lazy val core = project
   .settings(moduleName := "monoton-core")
@@ -53,16 +52,6 @@ lazy val plugin = project
     sbtVersion := "1.2.8",
     scalaVersion := v.scala212
   ))
-
-lazy val serverNetty = (project in file("server-netty"))
-  .settings(moduleName := "monoton-server-netty")
-  .settings(commonSettings)
-  .settings(guiceSettings)
-  .settings(libraryDependencies ++= Seq(
-    "io.netty" % "netty-all" % v.netty,
-    "org.slf4j" % "slf4j-api" % v.slf4jApi
-  ))
-  .dependsOn(core)
 
 lazy val serverAkkaHttp = (project in file("server-akka-http"))
   .settings(moduleName := "monoton-server-akka-http")
@@ -131,12 +120,12 @@ lazy val example = project
   .settings(moduleName := "monoton-example")
   .settings(commonSettings)
   .settings(libraryDependencies += "io.circe" %% "circe-generic" % v.circe)
-  .dependsOn(core, serverNetty, serverAkkaHttp, codecCirce, codecPlayJson)
+  .dependsOn(core, serverAkkaHttp, codecCirce, codecPlayJson)
 
 lazy val it = project
   .settings(moduleName := "monoton-it")
   .settings(commonSettings)
-  .dependsOn(core, serverNetty, clientScalajHttp)
+  .dependsOn(core, clientScalajHttp)
   // integration test settings
   .configs(IntegrationTest)
   .settings(
