@@ -4,8 +4,8 @@ import java.util.UUID
 
 import com.example.controllers.{HealthCheckController, UserController}
 import com.example.model.UserId
-import monoton.server.RoutingDSL
-import monoton.util.Read
+import guttural.server.RoutingDSL
+import guttural.util.Read
 
 class ExampleRouter(
     healthCheckResource: HealthCheckController,

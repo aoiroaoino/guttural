@@ -1,7 +1,7 @@
 package com.example.controllers.auth
 
-import monoton.http.{Request, Response, ResponseBuilders}
-import monoton.server.RequestFactory
+import guttural.http.{Request, Response, ResponseBuilders}
+import guttural.server.RequestFactory
 
 final case class AuthenticatedUserRequest(request: Request, userId: String)
 

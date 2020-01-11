@@ -1,14 +1,15 @@
 import microsites._
+import Dependencies._
 
 inThisBuild(Seq(
   organization := "dev.aoiroaoino",
-  name := "monoton",
+  name := "guttural",
   version := "0.1.0-SNAPSHOT"
 ))
 
 lazy val v = new {
-  val scala213 = "2.13.0"
-  val scala212 = "2.12.9"
+  val scala213 = "2.13.1"
+  val scala212 = "2.12.10"
   // servers
   val akkaHttp = "10.1.9"
   // adapters
@@ -28,43 +29,37 @@ lazy val commonSettings = Seq(
   )
 )
 
-lazy val guiceSettings = Seq(
-  libraryDependencies ++= Seq(
-    "javax.inject" % "javax.inject" % "1",
-    "com.google.inject" % "guice" % "4.2.2"
-  )
-)
-
-lazy val root = (project in file("."))
-  .settings(moduleName := "monoton")
-  .settings(commonSettings)
+lazy val guttural = (project in file("."))
+  .settings(moduleName := "guttural")
+  .settings(commonSettings: _*)
   .aggregate(core, serverAkkaHttp, codecCirce, codecPlayJson)
   .dependsOn(core, serverAkkaHttp, codecCirce, codecPlayJson)
 
 lazy val core = project
-  .settings(moduleName := "monoton-core")
+  .settings(moduleName := "guttural-core")
   .settings(commonSettings)
 
 lazy val plugin = project
-  .settings(moduleName := "monoton-plugin")
-  .settings(Seq( // plugin settings
+  .settings(moduleName := "guttural-plugin")
+  .settings( // plugin settings
     sbtPlugin := true,
     sbtVersion := "1.2.8",
     scalaVersion := v.scala212
-  ))
+  )
 
 lazy val serverAkkaHttp = (project in file("server-akka-http"))
-  .settings(moduleName := "monoton-server-akka-http")
-  .settings(commonSettings)
+  .settings(moduleName := "guttural-server-akka-http")
+  .settings(commonSettings: _*)
   .settings(libraryDependencies ++= Seq(
     "com.typesafe.akka" %% "akka-http"   % "10.1.9",
     "com.typesafe.akka" %% "akka-stream" % "2.5.23",
+    airframe,
     "org.slf4j" % "slf4j-api" % v.slf4jApi
   ))
   .dependsOn(core)
 
 lazy val clientScalajHttp = (project in file("client-scalaj-http"))
-  .settings(moduleName := "monoton-client-scalaj-http")
+  .settings(moduleName := "guttural-client-scalaj-http")
   .settings(commonSettings)
   .settings(libraryDependencies ++= Seq(
     "org.scalaj" %% "scalaj-http" % "2.4.2"
@@ -72,7 +67,7 @@ lazy val clientScalajHttp = (project in file("client-scalaj-http"))
   .dependsOn(core)
 
 lazy val codecCirce = (project in file("codec-circe"))
-  .settings(moduleName := "monoton-codec-circe")
+  .settings(moduleName := "guttural-codec-circe")
   .settings(commonSettings)
   .settings(libraryDependencies ++= Seq(
     "io.circe" %% "circe-core" % v.circe,
@@ -81,7 +76,7 @@ lazy val codecCirce = (project in file("codec-circe"))
   .dependsOn(core)
 
 lazy val codecPlayJson = (project in file("codec-play-json"))
-  .settings(moduleName := "monoton-codec-play-json")
+  .settings(moduleName := "guttural-codec-play-json")
   .settings(commonSettings)
   .settings(libraryDependencies ++= Seq(
     "com.typesafe.play" %% "play-json" % "2.8.0-M5"
@@ -89,20 +84,20 @@ lazy val codecPlayJson = (project in file("codec-play-json"))
   .dependsOn(core)
 
 lazy val docs = project
-  .settings(moduleName := "monoton-docs")
+  .settings(moduleName := "guttural-docs")
   .settings(Seq(
     micrositeName := "Monoton",
     micrositeDescription := "Simple and Monotonous Web Framework for Scala",
-//    micrositeUrl := "https://github.com/aoiroaoino/monoton",
+//    micrositeUrl := "https://github.com/aoiroaoino/guttural",
     micrositeDocumentationUrl := "/docs",
     micrositeAuthor := "aoiroaoino",
-    micrositeHomepage := "https://github.com/aoiroaoino/monoton",
+    micrositeHomepage := "https://github.com/aoiroaoino/guttural",
     // Twitter
     micrositeTwitter := "@aoiroaoino",
     micrositeTwitterCreator := "@aoiroaoino",
     // GitHub
     micrositeGithubOwner := "aoiroaoino",
-    micrositeGithubRepo := "monoton",
+    micrositeGithubRepo := "guttural",
     // other
     micrositeHighlightTheme := "atom-one-light",
     micrositeExtraMdFiles := Map(
@@ -117,13 +112,20 @@ lazy val docs = project
 
 // TODO: move to other repository
 lazy val example = project
-  .settings(moduleName := "monoton-example")
+  .settings(moduleName := "guttural-example")
   .settings(commonSettings)
   .settings(libraryDependencies += "io.circe" %% "circe-generic" % v.circe)
   .dependsOn(core, serverAkkaHttp, codecCirce, codecPlayJson)
 
+lazy val example2 = project
+  .settings(moduleName := "guttural-example2")
+  .settings(commonSettings)
+  .settings(libraryDependencies += "io.circe" %% "circe-generic" % v.circe)
+  .settings(libraryDependencies += airframe)
+  .dependsOn(core, serverAkkaHttp, codecCirce, codecPlayJson)
+
 lazy val it = project
-  .settings(moduleName := "monoton-it")
+  .settings(moduleName := "guttural-it")
   .settings(commonSettings)
   .dependsOn(core, clientScalajHttp)
   // integration test settings

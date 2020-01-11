@@ -1,14 +1,14 @@
 package com.example.controllers
 
 import com.example.model.{User, UserDataAccessor, UserId}
-import monoton.http.codec.CirceJson
-import monoton.http.Form
-import monoton.server.Controller
+import guttural.http.codec.CirceJson
+import guttural.http.Form
+import guttural.server.Controller
 
 import scala.util.chaining._
 
 class UserController extends Controller {
-  import monoton.http.codec.circe._
+  import guttural.http.codec.circe._
   import UserController._
 
   def list: RequestHandler =

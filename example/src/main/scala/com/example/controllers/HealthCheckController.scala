@@ -3,9 +3,9 @@ package com.example.controllers
 import java.time.ZonedDateTime
 import java.util.UUID
 
-import monoton.http.server.HandlerBuilder
-import monoton.http.{Cookie, Response}
-import monoton.server.Controller
+import guttural.http.server.HandlerBuilder
+import guttural.http.{Cookie, Response}
+import guttural.server.Controller
 
 class HealthCheckController extends Controller {
 

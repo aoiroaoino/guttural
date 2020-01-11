@@ -3,8 +3,8 @@ package com.example
 import java.util.concurrent.Executors
 
 import com.example.controllers.{HealthCheckController, UserController}
-import monoton.http.server.Server
-import monoton.server.{ServerImpl, ServerImplByAkkaHttp}
+import guttural.http.server.Server
+import guttural.server.{ServerImpl, ServerImplByAkkaHttp}
 
 import scala.concurrent.ExecutionContext
 
