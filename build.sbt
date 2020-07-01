@@ -8,8 +8,8 @@ inThisBuild(Seq(
 ))
 
 lazy val v = new {
-  val scala213 = "2.13.1"
-  val scala212 = "2.12.10"
+  val scala213 = "2.13.3"
+  val scala212 = "2.12.11"
   // servers
   val akkaHttp = "10.1.9"
   // adapters
